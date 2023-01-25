@@ -6,7 +6,6 @@ import Link from "next/link";
 import * as s from "../../styles/common.style";
 import InlineSVG from "react-inlinesvg";
 
-import HomeIcon from "../../public/assets/home-icon.svg";
 
 const Sidebar = () => {
   return (
