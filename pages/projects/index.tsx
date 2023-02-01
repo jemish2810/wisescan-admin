@@ -28,7 +28,7 @@ const Project = () => {
                 <input
                   type="text"
                   className="form-control"
-                  placeholder="Search clinent by name"
+                  placeholder="Search project by name"
                   aria-label="Recipient's username"
                   aria-describedby="button-addon2"
                 ></input>

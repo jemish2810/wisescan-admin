@@ -108,7 +108,7 @@ const Sidebar = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/newsline">
+                  <Link href="/newslinemanagement">
                     <img
                       src="assets/newspaper-outline-2.svg"
                       alt="icon"
