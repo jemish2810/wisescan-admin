@@ -687,6 +687,11 @@ export const TableCommon = styled.div`
         width: 40px;
         height: 40px;
         border-radius: 50%;
+        img{
+          width:100%;
+          height:100%;
+          border-radius: 50%;
+        }
       }
     }
   }

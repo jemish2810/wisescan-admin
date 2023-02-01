@@ -55,7 +55,7 @@ const Projectmanagement = () => {
                     <td>
                       <div className="profile-img">
                         <img
-                          src="assets/img-profile.png"
+                          src="assets/profile1.jpg"
                           alt="img-profile"
                         ></img>
                       </div>
@@ -81,7 +81,7 @@ const Projectmanagement = () => {
                     <td>
                       <div className="profile-img">
                         <img
-                          src="assets/img-profile.png"
+                          src="assets/profile1.jpg"
                           alt="img-profile"
                         ></img>
                       </div>
@@ -107,7 +107,7 @@ const Projectmanagement = () => {
                     <td>
                       <div className="profile-img">
                         <img
-                          src="assets/img-profile.png"
+                          src="assets/profile1.jpg"
                           alt="img-profile"
                         ></img>
                       </div>
@@ -133,7 +133,7 @@ const Projectmanagement = () => {
                     <td>
                       <div className="profile-img">
                         <img
-                          src="assets/img-profile.png"
+                          src="assets/profile1.jpg"
                           alt="img-profile"
                         ></img>
                       </div>
