@@ -6,10 +6,11 @@ import Link from "next/link";
 import * as s from "../../styles/common.style";
 // import { Sidebar } from "../sidebar";
 import Sidebar from "../sidebar";
-import { useRouter } from 'next/router';
+import { useRouter } from "next/router";
 
 const Projectmanagement = () => {
-  const router= useRouter();
+  const router = useRouter();
+
   return (
     <>
       <Sidebar />
@@ -17,7 +18,11 @@ const Projectmanagement = () => {
         <div className="dashboard-block-inner">
           <div className="title-block flex-block-inner">
             <h3>News Line Management</h3>
-            <button type="submit" onClick={() => router.push("/newsline")}className="btn common-button-yellow">
+            <button
+              type="submit"
+              onClick={() => router.push("/newsline")}
+              className="btn common-button-yellow"
+            >
               Add News Line
             </button>
           </div>

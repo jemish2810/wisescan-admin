@@ -6,8 +6,11 @@ import Link from "next/link";
 import * as s from "../../styles/common.style";
 // import { Sidebar } from "../sidebar";
 import Sidebar from "../sidebar";
+import { useRouter } from "next/router";
 
 const Clients = () => {
+  const router = useRouter();
+
   return (
     <>
       <Sidebar />
@@ -15,7 +18,11 @@ const Clients = () => {
         <div className="dashboard-block-inner">
           <div className="title-block flex-block-inner">
             <h3>Client Management</h3>
-            <button type="submit" className="btn common-button-yellow">
+            <button
+              type="submit"
+              className="btn common-button-yellow"
+              onClick={() => router.push("/addClient")}
+            >
               Add Client
             </button>
           </div>

@@ -56,6 +56,22 @@ export const CommonForm = styled.form`
         font-size: 20px;
       }
     }
+    .checkbox-control {
+      display: flex;
+      input[type="checkbox"] {
+        /* removing default appearance */
+        -webkit-appearance: none;
+        appearance: none;
+        /* creating a custom design */
+        width: 1.6em;
+        height: 1.6em;
+        border-radius: 0.15em;
+        margin-right: 0.5em;
+        border: solid #000;
+        outline: none;
+        cursor: pointer;
+      }
+    }
     .form-control {
       background: #f2f7ff;
       border-radius: 6px;
@@ -687,12 +703,16 @@ export const TableCommon = styled.div`
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        img{
-          width:100%;
-          height:100%;
+        img {
+          width: 100%;
+          height: 100%;
           border-radius: 50%;
         }
       }
     }
   }
+`;
+
+export const ErrorMessageBlock = styled.span`
+  color: red;
 `;

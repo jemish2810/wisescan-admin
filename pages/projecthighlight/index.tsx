@@ -8,8 +8,33 @@ import * as s from "../../styles/common.style";
 import Sidebar from "../sidebar";
 
 import HomeIcon from "../../public/assets/home-icon.svg";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useForm } from "react-hook-form";
+import * as yup from "yup";
+import moment from "moment-mini";
+import { asyncAddProjectHighlights } from "@/services/project/project.service";
+
+const addProjectHighlightValidationSchema = yup.object({
+  p_name: yup.string().required("Project name is required"),
+  rank: yup.string().required("Rank is required"),
+  desc: yup.string().required("Description is required"),
+});
 
 const Projecthighlight = () => {
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(addProjectHighlightValidationSchema),
+  });
+  console.log(errors);
+
+  const onSubmitProjectHighlight = async (data: any) => {
+    const { p_name, rank, desc } = data;
+    const response = asyncAddProjectHighlights({ p_name, desc, rank });
+  };
   return (
     <>
       <Sidebar />
@@ -22,7 +47,10 @@ const Projecthighlight = () => {
             </p>
           </div>
           <div className="change-password-block">
-            <s.CommonForm className="common-form-block">
+            <s.CommonForm
+              className="common-form-block"
+              onSubmit={handleSubmit(onSubmitProjectHighlight)}
+            >
               <div className="form-group">
                 <label>
                   Project Name <span>*</span>
@@ -31,7 +59,13 @@ const Projecthighlight = () => {
                   type="text"
                   className="form-control"
                   placeholder="Enter Name"
+                  {...register("p_name", { required: true })}
                 ></input>
+                {errors?.p_name && (
+                  <s.ErrorMessageBlock>
+                    {errors?.p_name?.message}
+                  </s.ErrorMessageBlock>
+                )}
               </div>
               <div className="form-group">
                 <label>
@@ -41,18 +75,29 @@ const Projecthighlight = () => {
                   type="text"
                   className="form-control"
                   placeholder="Rank Priority"
+                  {...register("rank", { required: true })}
                 ></input>
+                {errors?.rank && (
+                  <s.ErrorMessageBlock>
+                    {errors?.rank?.message}
+                  </s.ErrorMessageBlock>
+                )}
               </div>
               <div className="form-group">
                 <label>
                   Project Write Up <span>*</span>
                 </label>
                 <textarea
-                  name=""
                   id=""
                   className="form-control"
                   placeholder="Message here"
+                  {...register("desc", { required: true })}
                 ></textarea>
+                {errors?.desc && (
+                  <s.ErrorMessageBlock>
+                    {errors?.desc?.message}
+                  </s.ErrorMessageBlock>
+                )}
               </div>
               <div className="form-group">
                 <label>
