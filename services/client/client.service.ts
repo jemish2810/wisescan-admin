@@ -21,7 +21,7 @@ export const asyncGetAllClients = async () => {
 export const asyncGetClient = async (payload: any) => {
   try {
     const response = await api
-      .post("/getClient", payload)
+      .get("/getClient", payload)
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
           return res.data;

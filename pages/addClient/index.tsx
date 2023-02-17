@@ -6,12 +6,17 @@ import Link from "next/link";
 import * as s from "../../styles/common.style";
 // import { Sidebar } from "../sidebar";
 import Sidebar from "../sidebar";
+import { useRouter } from "next/router";
 
 import HomeIcon from "../../public/assets/home-icon.svg";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import { asyncAddClient } from "@/services/client/client.service";
+import {
+  asyncAddClient,
+  asyncGetClient,
+} from "@/services/client/client.service";
+import { useEffect, useState } from "react";
 
 const addClientValidationSchema = yup.object({
   org_nam: yup.string().required("Organization name is required"),
@@ -24,16 +29,31 @@ const addClientValidationSchema = yup.object({
   status: yup.string().required("Status is required"),
 });
 
-const AddClient = () => {
+const AddClient = ({ editData }: any) => {
   const {
     register,
     handleSubmit,
-    setError,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(addClientValidationSchema),
   });
+  console.log("editData :>> ", editData);
+
   console.log(errors);
+
+  useEffect(() => {
+    if (editData) {
+      setValue("org_nam", editData?.org_name);
+      setValue("sal", editData?.sal);
+      setValue("c_name", editData?.c_name);
+      setValue("email", editData?.email);
+      setValue("usnme", editData?.usrnme);
+      setValue("pwd", editData?.pwd);
+      setValue("status", editData?.status);
+      setValue("phone", editData?.phone);
+    }
+  }, [editData, setValue]);
 
   const onSubmitProjectHighlight = async (data: any) => {
     const { org_nam, sal, c_name, email, usnme, phone, pwd } = data;
@@ -227,3 +247,12 @@ const AddClient = () => {
   );
 };
 export default AddClient;
+
+AddClient.getInitialProps = async ({ query }: any) => {
+  const { username } = query;
+  let editData = null;
+  if (username) {
+    const editData = await asyncGetClient({ username });
+  }
+  return { editData };
+};

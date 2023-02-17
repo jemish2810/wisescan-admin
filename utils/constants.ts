@@ -22,3 +22,26 @@ export const DAYS = [
 export const MONTHS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 export const YEARS = getYear();
+
+export const PAGE_SIZE = 10;
+
+export const DUMMY_CLIENTS = [
+  {
+    org_name: "ABC",
+    status: "pending",
+    c_name: "KFC",
+    usrnme: "devcorps",
+  },
+  {
+    org_name: "ABC",
+    status: "pending",
+    c_name: "new",
+    usrnme: "parth",
+  },
+  {
+    org_name: "ABC",
+    status: "pending",
+    c_name: "new2",
+    usrnme: "parth11",
+  },
+];

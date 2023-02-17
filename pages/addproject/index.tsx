@@ -6,13 +6,16 @@ import Link from "next/link";
 import * as s from "../../styles/common.style";
 // import { Sidebar } from "../sidebar";
 import Sidebar from "../sidebar";
+import Select from "react-select";
 
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import moment from "moment-mini";
 import { asyncAddProject } from "@/services/project/project.service";
-import { DAYS, MONTHS, YEARS } from "@/utils/constants";
+import { DAYS, DUMMY_CLIENTS, MONTHS, YEARS } from "@/utils/constants";
+import { useEffect, useState } from "react";
+import { asyncGetAllClients } from "@/services/client/client.service";
 
 const addProjectValidationSchema = yup.object({
   code: yup.string(),
@@ -39,6 +42,27 @@ const Addproject = () => {
   } = useForm({
     resolver: yupResolver(addProjectValidationSchema),
   });
+  const [selectedOption, setSelectedOption] = useState<any>(null);
+  const [options, setOptions] = useState<any>([]);
+
+  const handleChange = (selected: any) => {
+    setSelectedOption(selected);
+  };
+
+  useEffect(() => {
+    fetchClients();
+  }, []);
+
+  const fetchClients = async () => {
+    const data = await asyncGetAllClients();
+    console.log("data :>> ", data);
+    // if (data) {
+    const newOptions = DUMMY_CLIENTS.map((item: any) => {
+      return { value: item.c_name, label: item.c_name };
+    });
+    setOptions(newOptions);
+    // }
+  };
 
   console.log("errors", errors);
   const onSubmitProduct = async (data: any) => {
@@ -56,6 +80,16 @@ const Addproject = () => {
       period,
       geo,
     } = data;
+    if (!selectedOption) {
+      setError("clients", {
+        message: "Please select at least one client",
+      });
+      return;
+    }
+    const c_names = selectedOption?.map((item: any) => {
+      return item.c_name;
+    });
+    console.log("selectedOption :>> ", selectedOption);
     let start_date = startDay + "-" + startMonth + "-" + startYear;
     let end_date = endDay + "-" + endMonth + "-" + endYear;
     console.log("start_date :>> ", start_date);
@@ -83,6 +117,7 @@ const Addproject = () => {
       cont,
       period,
       geo,
+      c_names,
     });
   };
   return (
@@ -165,21 +200,18 @@ const Addproject = () => {
                   <label className="d-flex justify-content">
                     Client(s) <span> (Ctrl-click to select multiple)</span>
                   </label>
-                  <textarea
-                    name=""
-                    id=""
-                    className="form-control"
-                    placeholder="3i - 3i
-Aik Leong plumbing Construction Pte Ltd - Thazin Wint Nwe
-Ban Chon Corportation & Trading Pte Ltd - Foo Kin Loong
-Bureau Veritas - Tin Nandar Tun
-Bureau Veritas - Zaw Lynn Ko
-Continental Engineering - Gurudware - Prerit Sharma
-ED ZUBLIN AG - David SCHREINER
-GeoApplication Engineers Pte Ltd - Zhang Qing Hua
-GS Engineering & Construction Co. - Ji Woo Seng
-Continental Engineering - Gurudware - Prerit Sharma"
-                  ></textarea>
+                  <Select
+                    className="basic-multi-select"
+                    value={selectedOption}
+                    onChange={handleChange}
+                    options={options}
+                    isMulti
+                  />
+                  {errors?.clients && (
+                    <s.ErrorMessageBlock>
+                      {errors?.clients?.message}
+                    </s.ErrorMessageBlock>
+                  )}
                 </div>
               </div>
               <div className="common-form-block-inner">

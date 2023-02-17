@@ -27,11 +27,11 @@ const getLiveUrl = () => {
 const getBaseUrl = () => {
   switch (process.env.NEXT_PUBLIC_ENV_MODE) {
     case "production":
-      return `http://188.166.199.103:4000`;
+      return `http://143.198.198.28:5002`;
     case "development":
-      return `http://188.166.199.103:4000`;
+      return `http://143.198.198.28:5002`;
     default:
-      return `http://188.166.199.103:4000`;
+      return `http://143.198.198.28:5002`;
   }
 };
 
