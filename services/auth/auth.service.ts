@@ -9,11 +9,11 @@ const api = new Api();
 export const asyncUserLogin = async (payload: any) => {
   try {
     const { usnme, pwd } = payload;
-    let params = { usnme, pwd };
-    createCookie(localStorageKeys.authKey, usnme, 0);
+    let params = { usrnme: usnme, pwd };
     const response = await api
       .post("/signIn", params)
       .then(async (res: any) => {
+        createCookie(localStorageKeys.authKey, usnme, 0);
         if (res && res?.isSuccess) {
           Router.push(`/`);
         }
@@ -27,9 +27,9 @@ export const asyncUserLogin = async (payload: any) => {
 
 export const asyncLogout = async () => {
   try {
-    eraseCookie(localStorageKeys.authKey);
-    const response = await api.post("/signOut").then(async (res: any) => {
+    const response = await api.get("/signOut").then(async (res: any) => {
       if (res && res?.isSuccess) {
+        eraseCookie(localStorageKeys.authKey);
         localStorage.clear();
         Router.push(`/login`);
         return res.data;
