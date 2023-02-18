@@ -1,4 +1,5 @@
 import Api from "@/services/Api";
+import { errorAlert } from "@/utils/alerts";
 import { localStorageKeys } from "@/utils/constants";
 import { createCookie, eraseCookie } from "@/utils/cookieCreator";
 import Router from "next/router";
@@ -9,16 +10,11 @@ export const asyncUserLogin = async (payload: any) => {
   try {
     const { usnme, pwd } = payload;
     let params = { usnme, pwd };
-
+    createCookie(localStorageKeys.authKey, usnme, 0);
     const response = await api
       .post("/signIn", params)
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
-          createCookie(
-            localStorageKeys.authKey,
-            res.data?.tokens?.access?.token || "",
-            0
-          );
           Router.push(`/`);
         }
         return res;
@@ -31,10 +27,10 @@ export const asyncUserLogin = async (payload: any) => {
 
 export const asyncLogout = async () => {
   try {
+    eraseCookie(localStorageKeys.authKey);
     const response = await api.post("/signOut").then(async (res: any) => {
       if (res && res?.isSuccess) {
         localStorage.clear();
-        eraseCookie(localStorageKeys.authKey);
         Router.push(`/login`);
         return res.data;
       }
@@ -51,15 +47,15 @@ export const asyncChangePassword = async (payload: any) => {
     const { cur_pass, new_pass, re_pass, usnme } = payload;
     let params = { usnme, cur_pass, new_pass, re_pass };
     const response = await api
-      .post("/changePwd", params)
+      .put("/changePwd", params)
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
-          console.log(res);
+          return res;
         }
-        return res;
       });
     return response;
   } catch (e: any) {
+    errorAlert(e.message);
     return e.message;
   }
 };

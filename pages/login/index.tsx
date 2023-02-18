@@ -4,11 +4,13 @@ import { Inter } from "@next/font/google";
 import styles from "@/styles/Home.module.css";
 import Link from "next/link";
 import * as s from "../../styles/common.style";
-import { useRouter } from "next/router";
+import Router, { useRouter } from "next/router";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { asyncUserLogin } from "@/services/auth/auth.service";
+import { checkIsAuth } from "@/utils/globalFunctions";
+import { useEffect } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -38,6 +40,12 @@ export default function Home() {
     }
   };
   console.log(errors);
+  useEffect(() => {
+    if (checkIsAuth()) {
+      Router.push("/dashboard");
+      return;
+    }
+  }, []);
   return (
     <>
       {/* <Head>

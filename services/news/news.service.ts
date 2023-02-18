@@ -18,21 +18,6 @@ export const asyncGetNews = async () => {
   }
 };
 
-export const asyncGetProject = async (payload: any) => {
-  try {
-    const response = await api
-      .post("/getProjects", payload)
-      .then(async (res: any) => {
-        if (res && res?.isSuccess) {
-          return res.data;
-        }
-      });
-    return response;
-  } catch (e: any) {
-    return e.message;
-  }
-};
-
 export const asyncAddNews = async (payload: any) => {
   try {
     const response = await api
@@ -51,7 +36,7 @@ export const asyncAddNews = async (payload: any) => {
 export const asyncSearchNews = async (payload: any) => {
   try {
     const response = await api
-      .post("/searchNews", payload)
+      .get("/searchNews", { data: payload })
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
           return res.data;

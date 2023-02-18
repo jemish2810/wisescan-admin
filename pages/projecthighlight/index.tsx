@@ -1,40 +1,63 @@
-import Head from "next/head";
-import Image from "next/image";
-import { Inter } from "@next/font/google";
-import styles from "@/styles/Home.module.css";
-import Link from "next/link";
 import * as s from "../../styles/common.style";
-// import { Sidebar } from "../sidebar";
 import Sidebar from "../sidebar";
 
-import HomeIcon from "../../public/assets/home-icon.svg";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import moment from "moment-mini";
 import { asyncAddProjectHighlights } from "@/services/project/project.service";
+import Router from "next/router";
+import { errorAlert, successAlert } from "@/utils/alerts";
+import { useEffect } from "react";
+import { checkIsAuth } from "@/utils/globalFunctions";
 
-const addProjectHighlightValidationSchema = yup.object({
+const addProjectHighlightValidationSchema = yup.object().shape({
   p_name: yup.string().required("Project name is required"),
   rank: yup.string().required("Rank is required"),
   desc: yup.string().required("Description is required"),
+  picture: yup
+    .mixed()
+    .test("required", "You need to provide a file", (value: any) => {
+      return value && value.length;
+    }),
 });
 
-const Projecthighlight = () => {
+const ProjectHighlight = () => {
+  //hooks
   const {
     register,
     handleSubmit,
-    setError,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(addProjectHighlightValidationSchema),
   });
-  console.log(errors);
 
+  useEffect(() => {
+    if (!checkIsAuth()) {
+      Router.push("/");
+      return;
+    }
+  }, []);
+
+  //Submit method
   const onSubmitProjectHighlight = async (data: any) => {
-    const { p_name, rank, desc } = data;
-    const response = asyncAddProjectHighlights({ p_name, desc, rank });
+    const { p_name, rank, desc, picture } = data;
+    const response = await asyncAddProjectHighlights({
+      p_name,
+      desc,
+      rank,
+      pic_url: picture?.[0]?.name,
+    });
+    console.log("response :>> ", response);
+    if (response?.success) {
+      successAlert("Project highlight added successfully");
+      Router.back();
+      return;
+    }
+
+    errorAlert(response);
   };
+
+  //render method
   return (
     <>
       <Sidebar />
@@ -103,7 +126,16 @@ const Projecthighlight = () => {
                 <label>
                   Photo <span>*</span>
                 </label>
-                <input type="file"></input>
+                <input
+                  type="file"
+                  {...register("picture")}
+                  // onChange={onChangeFile}
+                />
+                {errors?.picture && (
+                  <s.ErrorMessageBlock>
+                    {errors.picture.message}
+                  </s.ErrorMessageBlock>
+                )}
               </div>
               <div className="last-btn">
                 <button type="submit" className="btn common-button-yellow">
@@ -117,4 +149,4 @@ const Projecthighlight = () => {
     </>
   );
 };
-export default Projecthighlight;
+export default ProjectHighlight;

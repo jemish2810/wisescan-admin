@@ -12,10 +12,16 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import moment from "moment-mini";
-import { asyncAddProject } from "@/services/project/project.service";
+import {
+  asyncAddProject,
+  asyncGetProject,
+  asyncUpdateProject,
+} from "@/services/project/project.service";
 import { DAYS, DUMMY_CLIENTS, MONTHS, YEARS } from "@/utils/constants";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { asyncGetAllClients } from "@/services/client/client.service";
+import Router from "next/router";
+import { checkIsAuth } from "@/utils/globalFunctions";
 
 const addProjectValidationSchema = yup.object({
   code: yup.string(),
@@ -33,15 +39,18 @@ const addProjectValidationSchema = yup.object({
   geo: yup.string().required("Geo-technical is required"),
 });
 
-const Addproject = () => {
+const AddProject = ({ editData }: any) => {
   const {
     register,
     handleSubmit,
     setError,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(addProjectValidationSchema),
   });
+  const dataFetchedRef = useRef(false);
+
   const [selectedOption, setSelectedOption] = useState<any>(null);
   const [options, setOptions] = useState<any>([]);
 
@@ -50,18 +59,35 @@ const Addproject = () => {
   };
 
   useEffect(() => {
+    if (editData) {
+      setValue("code", editData?.code);
+      setValue("cont", editData?.cont);
+      setValue("const", editData?.const);
+      setValue("dev", editData?.dev);
+      setValue("geo", editData?.geo);
+      setValue("p_name", editData?.p_name);
+      setValue("period", editData?.period);
+    }
+  }, [editData, setValue]);
+
+  useEffect(() => {
+    if (!checkIsAuth()) {
+      Router.push("/");
+      return;
+    }
+    if (dataFetchedRef.current) return;
+    dataFetchedRef.current = true;
     fetchClients();
   }, []);
 
   const fetchClients = async () => {
-    const data = await asyncGetAllClients();
-    console.log("data :>> ", data);
-    // if (data) {
-    const newOptions = DUMMY_CLIENTS.map((item: any) => {
-      return { value: item.c_name, label: item.c_name };
-    });
-    setOptions(newOptions);
-    // }
+    const response = await asyncGetAllClients();
+    if (response && response.data) {
+      const newOptions = response.data.map((item: any) => {
+        return { value: item.c_name, label: item.c_name };
+      });
+      setOptions(newOptions);
+    }
   };
 
   console.log("errors", errors);
@@ -86,7 +112,7 @@ const Addproject = () => {
       });
       return;
     }
-    const c_names = selectedOption?.map((item: any) => {
+    const a_cnames = selectedOption?.map((item: any) => {
       return item.c_name;
     });
     console.log("selectedOption :>> ", selectedOption);
@@ -108,17 +134,32 @@ const Addproject = () => {
       });
       return;
     }
-    const response = asyncAddProject({
-      code,
-      p_name,
-      start_date,
-      end_date,
-      dev,
-      cont,
-      period,
-      geo,
-      c_names,
-    });
+    if (editData) {
+      const response = asyncUpdateProject({
+        code,
+        p_name,
+        start_date,
+        end_date,
+        dev,
+        cont,
+        period,
+        geo,
+        a_cnames,
+      });
+    } else {
+      const response = asyncAddProject({
+        code,
+        p_name,
+        start_date,
+        end_date,
+        dev,
+        cont,
+        period,
+        geo,
+        a_cnames,
+      });
+      console.log("response :>> ", response);
+    }
   };
   return (
     <>
@@ -388,4 +429,13 @@ const Addproject = () => {
     </>
   );
 };
-export default Addproject;
+export default AddProject;
+
+AddProject.getInitialProps = async ({ query }: any) => {
+  const { code } = query;
+  let editData = null;
+  if (code) {
+    editData = await asyncGetProject({ code });
+  }
+  return { editData };
+};

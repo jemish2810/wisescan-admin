@@ -9,7 +9,7 @@ export const asyncGetAllProjects = async () => {
   try {
     const response = await api.get("/getAllProjects").then(async (res: any) => {
       if (res && res?.isSuccess) {
-        return res;
+        return res.data;
       }
     });
     return response;
@@ -21,7 +21,7 @@ export const asyncGetAllProjects = async () => {
 export const asyncGetProject = async (payload: any) => {
   try {
     const response = await api
-      .post("/getProjects", payload)
+      .get("/getProjects", { data: payload })
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
           return res.data;
@@ -51,7 +51,7 @@ export const asyncAddProject = async (payload: any) => {
 export const asyncUpdateProject = async (payload: any) => {
   try {
     const response = await api
-      .post("/updateProject", payload)
+      .put("/updateProject", payload)
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
           return res.data;
@@ -66,7 +66,7 @@ export const asyncUpdateProject = async (payload: any) => {
 export const asyncDeleteProject = async (payload: any) => {
   try {
     const response = await api
-      .post("/deleteProject", payload)
+      .delete("/deleteProject", { data: payload })
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
           return res.data;
@@ -81,7 +81,7 @@ export const asyncDeleteProject = async (payload: any) => {
 export const asyncSearchProject = async (payload: any) => {
   try {
     const response = await api
-      .post("/searchProject", payload)
+      .get("/searchProject", { data: payload })
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
           return res.data;
@@ -93,13 +93,13 @@ export const asyncSearchProject = async (payload: any) => {
   }
 };
 
-export const asyncGetProjectHighlights = async (payload: any) => {
+export const asyncGetProjectHighlights = async () => {
   try {
     const response = await api
-      .post("/getProjectHighlights", payload)
+      .get("/getProjectHighlights")
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
-          return res.data;
+          return res;
         }
       });
     return response;
@@ -126,10 +126,10 @@ export const asyncAddProjectHighlights = async (payload: any) => {
 export const asyncSearchProjectHighlights = async (payload: any) => {
   try {
     const response = await api
-      .post("/searchProjectHighlights", payload)
+      .get("/searchProjectHighlights", { data: payload })
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
-          return res.data;
+          return res;
         }
       });
     return response;

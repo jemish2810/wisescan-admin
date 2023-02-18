@@ -16,6 +16,9 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { asyncAddClient } from "@/services/client/client.service";
 import { asyncAddNews } from "@/services/news/news.service";
+import { useEffect } from "react";
+import { checkIsAuth } from "@/utils/globalFunctions";
+import Router from "next/router";
 
 const addNewsLineValidationSchema = yup.object({
   news: yup.string().required("News is required"),
@@ -35,6 +38,13 @@ const Newsline = () => {
     resolver: yupResolver(addNewsLineValidationSchema),
   });
   console.log(errors);
+
+  useEffect(() => {
+    if (!checkIsAuth()) {
+      Router.push("/");
+      return;
+    }
+  }, []);
 
   const onSubmitNewsLine = async (data: any) => {
     const { news, day, month, year, desc } = data;

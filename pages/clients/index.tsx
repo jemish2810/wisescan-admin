@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import Head from "next/head";
 import Image from "next/image";
 import { Inter } from "@next/font/google";
@@ -7,7 +8,7 @@ import * as s from "../../styles/common.style";
 // import { Sidebar } from "../sidebar";
 import Sidebar from "../sidebar";
 import { useRouter } from "next/router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import data from "../../utils/mockData.json";
 import Pagination from "@/src/components/Pagination";
 import {
@@ -15,7 +16,10 @@ import {
   asyncGetAllClients,
   asyncSearchClient,
 } from "@/services/client/client.service";
-import { DUMMY_CLIENTS } from "@/utils/constants";
+import { DUMMY_CLIENTS, localStorageKeys } from "@/utils/constants";
+import Loader from "@/src/components/Loader";
+import { readCookie } from "@/utils/cookieCreator";
+import { checkIsAuth } from "@/utils/globalFunctions";
 let PAGE_SIZE = 15;
 
 const Clients = () => {
@@ -25,13 +29,24 @@ const Clients = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [clientData, setClientData] = useState<any>([]);
   const [searchValue, setSearchValue] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const dataFetchedRef = useRef(false);
 
   useEffect(() => {
+    if (!checkIsAuth()) {
+      router.push("/");
+      return;
+    }
+    if (dataFetchedRef.current) return;
+    dataFetchedRef.current = true;
     fetchClients();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchClients = async () => {
+    setIsLoading(true);
     const response = await asyncGetAllClients();
+    setIsLoading(false);
     if (response && response.data) {
       setClientData(response.data);
     }
@@ -48,6 +63,8 @@ const Clients = () => {
   const handleOnClickDelete = async (data: any) => {
     // console.log("data :>> ", data);
     const deleteData = await asyncDeleteClient({ usname: data.usrnme });
+    console.log("deleteData :>> ", deleteData);
+    fetchClients();
   };
 
   const handleOnClickUpdate = async (data: any) => {
@@ -64,7 +81,11 @@ const Clients = () => {
 
   const handleOnClickSearch = async () => {
     if (searchValue) {
-      const deleteData = await asyncSearchClient({ c_name: searchValue });
+      const response = await asyncSearchClient({ c_name: searchValue });
+      console.log("response :>> ", response);
+      if (response && response.data) {
+        setClientData(response.data);
+      }
     }
   };
 
@@ -111,77 +132,85 @@ const Clients = () => {
                 </div>
               </div>
             </div>
-            <s.TableCommon>
-              <table>
-                <thead>
-                  <tr>
-                    <th>
-                      <div className="form-group">
-                        <input type="checkbox" checked></input>
-                        <label></label>
-                      </div>
-                    </th>
-                    <th>Organization</th>
-                    <th>Status</th>
-                    <th>Name</th>
-                    <th>Username</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentTableData.map((item: any, index: number) => {
-                    return (
-                      <tr key={index}>
-                        <td>
-                          <div className="form-group">
-                            <input type="checkbox"></input>
-                            <label></label>
-                          </div>
-                        </td>
-                        <td>{item?.org_name}</td>
-                        <td>{item?.status}</td>
-                        <td>{item?.c_name}</td>
-                        <td>
-                          <span className="highlight">{item?.usrnme}</span>
-                        </td>
-                        <td>
-                          <div className="action-block">
-                            <Link
-                              href=""
-                              onClick={() => handleOnClickUpdate(item)}
-                            >
-                              <img src="assets/edit-icon.svg" alt="edit-icon" />
-                            </Link>
-                            <Link
-                              href=""
-                              className="delete-icon"
-                              onClick={() => handleOnClickDelete(item)}
-                            >
-                              <img
-                                src="assets/trash-icon.svg"
-                                alt="trash-icon"
-                              />
-                            </Link>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-              <Pagination
-                className="pagination-bar"
-                currentPage={currentPage}
-                totalCount={clientData.length}
-                pageSize={PAGE_SIZE}
-                onPageChange={(page: any) => setCurrentPage(page)}
-              />
-              <div className="last-table-block">
-                <button type="submit" className="btn common-button-black">
-                  Add Client
-                </button>
-              </div>
-            </s.TableCommon>
+
+            {isLoading ? (
+              <Loader isLoading={isLoading} />
+            ) : (
+              <s.TableCommon>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>
+                        <div className="form-group">
+                          <input type="checkbox" checked></input>
+                          <label></label>
+                        </div>
+                      </th>
+                      <th>Organization</th>
+                      <th>Status</th>
+                      <th>Name</th>
+                      <th>Username</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentTableData.map((item: any, index: number) => {
+                      return (
+                        <tr key={index}>
+                          <td>
+                            <div className="form-group">
+                              <input type="checkbox"></input>
+                              <label></label>
+                            </div>
+                          </td>
+                          <td>{item?.org_name}</td>
+                          <td>{item?.status}</td>
+                          <td>{item?.c_name}</td>
+                          <td>
+                            <span className="highlight">{item?.usrnme}</span>
+                          </td>
+                          <td>
+                            <div className="action-block">
+                              <Link
+                                href=""
+                                onClick={() => handleOnClickUpdate(item)}
+                              >
+                                <img
+                                  src="assets/edit-icon.svg"
+                                  alt="edit-icon"
+                                />
+                              </Link>
+                              <Link
+                                href=""
+                                className="delete-icon"
+                                onClick={() => handleOnClickDelete(item)}
+                              >
+                                <img
+                                  src="assets/trash-icon.svg"
+                                  alt="trash-icon"
+                                />
+                              </Link>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+                <Pagination
+                  className="pagination-bar"
+                  currentPage={currentPage}
+                  totalCount={clientData.length}
+                  pageSize={PAGE_SIZE}
+                  onPageChange={(page: any) => setCurrentPage(page)}
+                />
+                <div className="last-table-block">
+                  <button type="submit" className="btn common-button-black">
+                    Add Client
+                  </button>
+                </div>
+              </s.TableCommon>
+            )}
           </div>
         </div>
       </s.CommonDashboardBlock>

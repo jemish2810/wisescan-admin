@@ -11,6 +11,11 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { asyncChangePassword } from "@/services/auth/auth.service";
+import { useEffect } from "react";
+import { checkIsAuth } from "@/utils/globalFunctions";
+import Router from "next/router";
+import { readCookie } from "@/utils/cookieCreator";
+import { localStorageKeys } from "@/utils/constants";
 
 const addProjectValidationSchema = yup
   .object({
@@ -43,16 +48,24 @@ const Changepassword = () => {
     resolver: yupResolver(addProjectValidationSchema),
   });
   console.log(errors);
+
+  useEffect(() => {
+    if (!checkIsAuth()) {
+      Router.push("/");
+      return;
+    }
+  }, []);
+
   const onSubmitChangePassword = async (data: any) => {
     const { cur_pass, new_pass, re_pass } = data;
-    let usnme = "dummy";
-    // TODO: add logic for get the current username
+    const usnme = readCookie(localStorageKeys.authKey);
     const response = await asyncChangePassword({
       cur_pass,
       new_pass,
       re_pass,
       usnme,
     });
+    console.log("response :>> ", response);
   };
 
   return (

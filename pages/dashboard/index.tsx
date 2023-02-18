@@ -8,8 +8,18 @@ import * as s from "../../styles/common.style";
 import Sidebar from "../sidebar";
 
 import HomeIcon from "../../public/assets/home-icon.svg";
+import { checkIsAuth } from "@/utils/globalFunctions";
+import { useEffect } from "react";
+import Router from "next/router";
 
 const Dashboard = () => {
+  useEffect(() => {
+    if (!checkIsAuth()) {
+      Router.push("/");
+      return;
+    }
+  }, []);
+
   return (
     <>
       <Sidebar />

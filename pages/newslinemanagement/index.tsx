@@ -3,11 +3,13 @@ import Link from "next/link";
 import * as s from "../../styles/common.style";
 import Sidebar from "../sidebar";
 import { useRouter } from "next/router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { asyncGetNews, asyncSearchNews } from "@/services/news/news.service";
 import data from "../../utils/mockData.json";
 import Pagination from "@/src/components/Pagination";
 import { PAGE_SIZE } from "@/utils/constants";
+import Loader from "@/src/components/Loader";
+import { checkIsAuth } from "@/utils/globalFunctions";
 
 const NewsLineManagement = () => {
   //States
@@ -16,10 +18,18 @@ const NewsLineManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [totalPageCount, setTotalPageCount] = useState(0);
   const [searchValue, setSearchValue] = useState("");
+
   const router = useRouter();
+  const dataFetchedRef = useRef(false);
 
   //Life cycle hooks
   useEffect(() => {
+    if (!checkIsAuth()) {
+      router.push("/");
+      return;
+    }
+    if (dataFetchedRef.current) return;
+    dataFetchedRef.current = true;
     fetchNews();
   }, []);
 
@@ -150,6 +160,7 @@ const NewsLineManagement = () => {
             </s.TableCommon>
           </div>
         </div>
+        <Loader isLoading={isLoading} />
       </s.CommonDashboardBlock>
     </>
   );

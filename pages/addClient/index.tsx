@@ -6,7 +6,7 @@ import Link from "next/link";
 import * as s from "../../styles/common.style";
 // import { Sidebar } from "../sidebar";
 import Sidebar from "../sidebar";
-import { useRouter } from "next/router";
+import Router from "next/router";
 
 import HomeIcon from "../../public/assets/home-icon.svg";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -17,6 +17,7 @@ import {
   asyncGetClient,
 } from "@/services/client/client.service";
 import { useEffect, useState } from "react";
+import { checkIsAuth } from "@/utils/globalFunctions";
 
 const addClientValidationSchema = yup.object({
   org_nam: yup.string().required("Organization name is required"),
@@ -40,7 +41,12 @@ const AddClient = ({ editData }: any) => {
   });
   console.log("editData :>> ", editData);
 
-  console.log(errors);
+  useEffect(() => {
+    if (!checkIsAuth()) {
+      Router.push("/");
+      return;
+    }
+  }, []);
 
   useEffect(() => {
     if (editData) {
@@ -65,6 +71,7 @@ const AddClient = ({ editData }: any) => {
       usnme,
       phone,
       pwd,
+      id_admin: "True",
     });
   };
   return (
@@ -109,6 +116,7 @@ const AddClient = ({ editData }: any) => {
                       <option selected disabled>
                         Select
                       </option>
+                      <option>123</option>
                     </select>
                   </div>
                   <input
@@ -225,6 +233,9 @@ const AddClient = ({ editData }: any) => {
                       <option selected disabled>
                         Select
                       </option>
+                      <option value="active">Active</option>
+                      <option value="pending">Pending</option>
+                      <option value="inActive">In Active</option>
                     </select>
                   </div>
                 </div>
@@ -252,7 +263,7 @@ AddClient.getInitialProps = async ({ query }: any) => {
   const { username } = query;
   let editData = null;
   if (username) {
-    const editData = await asyncGetClient({ username });
+    editData = await asyncGetClient({ usrnme: username });
   }
   return { editData };
 };

@@ -21,7 +21,7 @@ export const asyncGetAllClients = async () => {
 export const asyncGetClient = async (payload: any) => {
   try {
     const response = await api
-      .get("/getClient", payload)
+      .get("/getClient", { data: payload })
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
           return res.data;
@@ -66,7 +66,7 @@ export const asyncUpdateClient = async (payload: any) => {
 export const asyncDeleteClient = async (payload: any) => {
   try {
     const response = await api
-      .post("/deleteClient", payload)
+      .delete("/deleteClient", { data: payload })
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
           return res.data;
@@ -81,7 +81,7 @@ export const asyncDeleteClient = async (payload: any) => {
 export const asyncSearchClient = async (payload: any) => {
   try {
     const response = await api
-      .post("/searchClient", payload)
+      .get("/searchClient", { data: payload })
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
           return res.data;
