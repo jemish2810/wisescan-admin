@@ -11,9 +11,13 @@ import HomeIcon from "../../public/assets/home-icon.svg";
 import { checkIsAuth } from "@/utils/globalFunctions";
 import { useEffect } from "react";
 import Router from "next/router";
+import { errorAlert, successAlert } from "@/utils/alerts";
 
 const Dashboard = () => {
   useEffect(() => {
+    errorAlert("something went wrong");
+    successAlert("good");
+
     if (!checkIsAuth()) {
       Router.push("/");
       return;

@@ -40,8 +40,8 @@ const NewsLineManagement = () => {
     setIsLoading(false);
     const totalPageCount = Math.ceil(data.length / PAGE_SIZE);
     setTotalPageCount(totalPageCount);
-    if (news) {
-      setNewsData(news);
+    if (news && news.data) {
+      setNewsData(news.data);
     }
   };
 
@@ -50,8 +50,8 @@ const NewsLineManagement = () => {
     const firstPageIndex = (currentPage - 1) * PAGE_SIZE;
     const lastPageIndex = firstPageIndex + PAGE_SIZE;
 
-    return data.slice(firstPageIndex, lastPageIndex);
-  }, [currentPage]);
+    return newsData.slice(firstPageIndex, lastPageIndex);
+  }, [currentPage, newsData]);
 
   //Other methods
   const handleOnChangeSearch = (event: any) => {
@@ -148,7 +148,7 @@ const NewsLineManagement = () => {
               <Pagination
                 className="pagination-bar"
                 currentPage={currentPage}
-                totalCount={data.length}
+                totalCount={newsData.length}
                 pageSize={PAGE_SIZE}
                 onPageChange={(page: any) => setCurrentPage(page)}
               />

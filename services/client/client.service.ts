@@ -51,7 +51,7 @@ export const asyncAddClient = async (payload: any) => {
 export const asyncUpdateClient = async (payload: any) => {
   try {
     const response = await api
-      .post("/updateClient", payload)
+      .put("/updateClient", payload)
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
           return res.data;

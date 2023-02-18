@@ -56,7 +56,10 @@ const Newsline = () => {
       });
       return;
     }
-    const response = asyncAddNews({ news, desc, start_date });
+    const response = await asyncAddNews({ news, desc, start_date });
+    if (response && response?.success) {
+      Router.back();
+    }
   };
   return (
     <>

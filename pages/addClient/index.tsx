@@ -15,6 +15,7 @@ import * as yup from "yup";
 import {
   asyncAddClient,
   asyncGetClient,
+  asyncUpdateClient,
 } from "@/services/client/client.service";
 import { useEffect, useState } from "react";
 import { checkIsAuth } from "@/utils/globalFunctions";
@@ -57,6 +58,7 @@ const AddClient = ({ editData }: any) => {
       setValue("email", editData?.email);
       setValue("usrnme", editData?.usrnme);
       setValue("pwd", editData?.pwd);
+      setValue("phone", editData?.phone);
       setValue("status", editData?.status);
       setValue("pdf_flag", editData?.pdf_flag);
       setValue("xls_flag", editData?.xls_flag);
@@ -67,7 +69,13 @@ const AddClient = ({ editData }: any) => {
   console.log("errors :>> ", errors);
   const onSubmitProjectHighlight = async (data: any) => {
     console.log("data :>> ", data);
-    const response = asyncAddClient({ ...data });
+    if (editData) {
+      const response = await asyncUpdateClient({ ...data });
+      if (response?.success) Router.back();
+      return;
+    }
+    const response = await asyncAddClient({ ...data });
+    if (response?.success) Router.back();
   };
   return (
     <>
@@ -268,7 +276,7 @@ const AddClient = ({ editData }: any) => {
               </div>
               <div className="last-btn">
                 <button type="submit" className="btn common-button-yellow">
-                  Add
+                  {editData ? `Update` : `Add`}
                 </button>
               </div>
             </s.CommonForm>
