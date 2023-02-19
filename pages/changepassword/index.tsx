@@ -70,6 +70,9 @@ const Changepassword = () => {
 
   return (
     <>
+      <Head>
+        <title>WiseScan | Change Password</title>
+      </Head>
       <Sidebar />
       <s.CommonDashboardBlock>
         <div className="dashboard-block-inner">

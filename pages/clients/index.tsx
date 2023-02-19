@@ -91,6 +91,9 @@ const Clients = () => {
 
   return (
     <>
+      <Head>
+        <title>WiseScan | Clients</title>
+      </Head>
       <Sidebar />
       <s.CommonDashboardBlock>
         <div className="dashboard-block-inner">

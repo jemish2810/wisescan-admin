@@ -63,6 +63,9 @@ const Newsline = () => {
   };
   return (
     <>
+      <Head>
+        <title>WiseScan | Add NewsLine</title>
+      </Head>
       <Sidebar />
       <s.CommonDashboardBlock>
         <div className="dashboard-block-inner">

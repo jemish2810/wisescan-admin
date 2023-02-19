@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import * as s from "../../styles/common.style";
+import Head from "next/head";
 import Sidebar from "../sidebar";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -69,6 +70,9 @@ const NewsLineManagement = () => {
   //render methods
   return (
     <>
+      <Head>
+        <title>WiseScan | NewsLine Management</title>
+      </Head>
       <Sidebar />
       <s.CommonDashboardBlock>
         <div className="dashboard-block-inner">
