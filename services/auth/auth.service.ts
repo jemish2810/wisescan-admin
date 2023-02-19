@@ -15,7 +15,7 @@ export const asyncUserLogin = async (payload: any) => {
       .then(async (res: any) => {
         createCookie(localStorageKeys.authKey, usnme, 0);
         if (res && res?.isSuccess) {
-          Router.push(`/`);
+          Router.push(`/dashboard`);
         }
         return res;
       });
