@@ -1,6 +1,6 @@
 import * as s from "../../styles/common.style";
 import Sidebar from "../sidebar";
-
+import Head from "next/head";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -60,6 +60,9 @@ const ProjectHighlight = () => {
   //render method
   return (
     <>
+      <Head>
+        <title>WiseScan | Add Project Highlight</title>
+      </Head>
       <Sidebar />
       <s.CommonDashboardBlock>
         <div className="dashboard-block-inner">

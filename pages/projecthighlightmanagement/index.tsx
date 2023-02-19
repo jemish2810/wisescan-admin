@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
+import Head from "next/head";
 import Link from "next/link";
 import * as s from "../../styles/common.style";
 import Sidebar from "../sidebar";
@@ -68,6 +69,9 @@ const ProjectManagement = () => {
   };
   return (
     <>
+      <Head>
+        <title>WiseScan | Project Highlight Management</title>
+      </Head>
       <Sidebar />
       <s.CommonDashboardBlock>
         <div className="dashboard-block-inner">

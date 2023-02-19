@@ -6,7 +6,7 @@ import Link from "next/link";
 import * as s from "../../styles/common.style";
 // import { Sidebar } from "../sidebar";
 import Sidebar from "../sidebar";
-import Router from "next/router";
+import Router, { useRouter } from "next/router";
 
 import HomeIcon from "../../public/assets/home-icon.svg";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -33,6 +33,8 @@ const addClientValidationSchema = yup.object({
 });
 
 const AddClient = ({ editData }: any) => {
+  const router = useRouter();
+  console.log('router: ', router);
   const {
     register,
     handleSubmit,
@@ -79,11 +81,14 @@ const AddClient = ({ editData }: any) => {
   };
   return (
     <>
+      <Head>
+        {router.query.username ? <title>WiseScan | Edit Client</title>  : <title>WiseScan | Add New Client</title>}
+      </Head>
       <Sidebar />
       <s.CommonDashboardBlock>
         <div className="dashboard-block-inner">
           <div className="title-block flex-block-inner">
-            <h3>Add Client</h3>
+            <h3>{router.query.username ? "Edit Client" : "Add Client" }</h3>
             <p>
               <span>* </span>Denotes compulsory fields
             </p>

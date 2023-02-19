@@ -22,6 +22,7 @@ import { useEffect, useRef, useState } from "react";
 import { asyncGetAllClients } from "@/services/client/client.service";
 import Router from "next/router";
 import { checkIsAuth } from "@/utils/globalFunctions";
+import { useRouter } from 'next/router';
 
 const addProjectValidationSchema = yup.object({
   code: yup.string(),
@@ -50,6 +51,7 @@ const AddProject = ({ editData }: any) => {
     resolver: yupResolver(addProjectValidationSchema),
   });
   const dataFetchedRef = useRef(false);
+  const router = useRouter();
 
   const [selectedOption, setSelectedOption] = useState<any>(null);
   const [options, setOptions] = useState<any>([]);
@@ -163,6 +165,9 @@ const AddProject = ({ editData }: any) => {
   };
   return (
     <>
+      <Head>
+        {router.query?.code ? <title>WiseScan | Edit Project</title> : <title>WiseScan | Add Project</title>}
+      </Head>
       <Sidebar />
       <s.CommonDashboardBlock>
         <div className="dashboard-block-inner">

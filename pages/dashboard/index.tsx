@@ -26,6 +26,9 @@ const Dashboard = () => {
 
   return (
     <>
+      <Head>
+        <title>WiseScan | Dashboard</title>
+      </Head>
       <Sidebar />
       <s.CommonDashboardBlock>
         <div className="dashboard-block-inner">

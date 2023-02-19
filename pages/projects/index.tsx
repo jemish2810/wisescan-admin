@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
+import Head from "next/head";
 import * as s from "../../styles/common.style";
 // import { Sidebar } from "../sidebar";
 import Sidebar from "../sidebar";
@@ -88,6 +89,9 @@ const Project = () => {
 
   return (
     <>
+      <Head>
+        <title>WiseScan | Projects</title>
+      </Head>
       <Sidebar />
       <s.CommonDashboardBlock>
         <div className="dashboard-block-inner">
