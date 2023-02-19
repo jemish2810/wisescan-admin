@@ -8,10 +8,27 @@ import * as s from "../../styles/common.style";
 import Sidebar from "../sidebar";
 
 import HomeIcon from "../../public/assets/home-icon.svg";
+import { checkIsAuth } from "@/utils/globalFunctions";
+import { useEffect } from "react";
+import Router from "next/router";
+import { errorAlert, successAlert } from "@/utils/alerts";
 
 const Dashboard = () => {
+  useEffect(() => {
+    errorAlert("something went wrong");
+    successAlert("good");
+
+    if (!checkIsAuth()) {
+      Router.push("/");
+      return;
+    }
+  }, []);
+
   return (
     <>
+      <Head>
+        <title>WiseScan | Dashboard</title>
+      </Head>
       <Sidebar />
       <s.CommonDashboardBlock>
         <div className="dashboard-block-inner">

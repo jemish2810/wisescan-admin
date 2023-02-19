@@ -50,10 +50,99 @@ export const CommonForm = styled.form`
       color: #363636;
       position: relative;
       display: block;
+      font-family: "Open Sans", sans-serif;
       span {
         position: relative;
         color: #e6813f;
         font-size: 20px;
+      }
+      &.pb-14 {
+        padding-bottom: 14px;
+      }
+    }
+    .checkbox-control {
+      display: flex;
+      input[type="checkbox"] {
+        /* removing default appearance */
+        -webkit-appearance: none;
+        appearance: none;
+        /* creating a custom design */
+        width: 1.6em;
+        height: 1.6em;
+        border-radius: 0.15em;
+        margin-right: 0.5em;
+        border: solid #000;
+        outline: none;
+        cursor: pointer;
+      }
+    }
+    .checkbox-control-main {
+      display: flex;
+
+      .custom-checkbox {
+        padding-right: 35px;
+        input {
+          padding: 0;
+          height: initial;
+          width: initial;
+          margin-bottom: 0;
+          display: none;
+          cursor: pointer;
+        }
+        label {
+          position: relative;
+          cursor: pointer;
+          font-weight: 400;
+          font-size: 16px;
+          line-height: 22px;
+          color: #363636;
+          font-family: "Open Sans", sans-serif;
+
+          &:before {
+            content: "";
+            -webkit-appearance: none;
+            background-color: transparent;
+            border: 1px solid #c9d6ef;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05),
+              inset 0px -15px 10px -12px rgba(0, 0, 0, 0.05);
+            padding: 14px;
+            display: inline-block;
+            position: relative;
+            vertical-align: middle;
+            cursor: pointer;
+            margin-right: 12px;
+            border-radius: 6px;
+          }
+        }
+        input:checked {
+          + label {
+            &:after {
+              display: block;
+              position: absolute;
+              top: 2px;
+              left: 9px;
+              width: 6px;
+              height: 14px;
+              border: solid #0079bf;
+              border-width: 0 2px 2px 0;
+              transform: rotate(45deg);
+            }
+          }
+        }
+        input:checked + label:after {
+          content: "";
+          display: block;
+          position: absolute;
+          top: 2px;
+          left: 9px;
+          width: 6px;
+          height: 14px;
+          border: solid #ef824a;
+          border-width: 0 2px 2px 0;
+          transform: rotate(45deg);
+          top: 5px;
+          left: 11px;
+        }
       }
     }
     .form-control {
@@ -110,6 +199,25 @@ export const CommonForm = styled.form`
       background: #fff;
       border: 2px solid #535353;
       color: #000;
+    }
+    &.permission-form-group {
+      display: flex;
+      .checkbox-control-main {
+        display: block;
+        width: 28%;
+        label {
+          display: block;
+        }
+      }
+      .check-block-permission {
+        width: 70%;
+        .form-group-day {
+          display: block;
+          .form-group-day-inner {
+            width: 100%;
+          }
+        }
+      }
     }
   }
   .login-from-inner {
@@ -244,6 +352,9 @@ export const SidebarMain = styled.div`
           padding: 0px;
           list-style: none;
           li {
+            .active {
+              background-color: #e6813f;
+            }
             a {
               display: flex;
               align-items: center;
@@ -506,6 +617,76 @@ export const CommonDashboardBlock = styled.div`
       }
     }
   }
+  .pagination-container {
+    display: flex;
+    list-style-type: none;
+
+    .pagination-item {
+      padding: 0 2px;
+      height: 32px;
+      text-align: center;
+      margin: auto 4px;
+      color: #363636;
+      display: flex;
+      box-sizing: border-box;
+      align-items: center;
+      letter-spacing: 0.01071em;
+      border-radius: 16px;
+      line-height: 1.43;
+      font-weight: 600;
+      font-size: 14px;
+      min-width: 23px;
+
+      &.dots:hover {
+        cursor: default;
+        color: #e6813f;
+      }
+      &:hover {
+        cursor: pointer;
+        color: #e6813f;
+      }
+
+      &.selected {
+        color: #e6813f;
+      }
+
+      .arrow {
+        &::before {
+          position: relative;
+          /* top: 3pt; Uncomment this to lower the icons as requested in comments*/
+          content: "";
+          /* By using an em scale, the arrows will size with the font */
+          display: inline-block;
+          width: 0.4em;
+          height: 0.4em;
+          border-right: 0.12em solid rgba(0, 0, 0, 0.87);
+          border-top: 0.12em solid rgba(0, 0, 0, 0.87);
+        }
+
+        &.left {
+          transform: rotate(-135deg) translate(-50%);
+        }
+
+        &.right {
+          transform: rotate(45deg);
+        }
+      }
+
+      &.disabled {
+        pointer-events: none;
+
+        .arrow::before {
+          border-right: 0.12em solid rgba(0, 0, 0, 0.43);
+          border-top: 0.12em solid rgba(0, 0, 0, 0.43);
+        }
+
+        &:hover {
+          background-color: transparent;
+          cursor: default;
+        }
+      }
+    }
+  }
 `;
 export const TableCommon = styled.div`
   table {
@@ -687,12 +868,84 @@ export const TableCommon = styled.div`
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        img{
-          width:100%;
-          height:100%;
+        img {
+          width: 100%;
+          height: 100%;
           border-radius: 50%;
         }
       }
     }
   }
+  &.width-changes-block-news {
+    table {
+      thead {
+        th {
+          width: 10%;
+
+          &:nth-child(1) {
+            width: 35%;
+          }
+          &:nth-child(2) {
+            width: 20%;
+          }
+          &:nth-child(3) {
+            width: 35%;
+          }
+        }
+      }
+    }
+  }
+  .btn-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    .progessbar-custom-block {
+      li {
+        background: none;
+        &:nth-child(1),
+        &:last-child {
+          background: #363636;
+          border-radius: 4px;
+          padding: 0;
+          width: 90px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 36px;
+          font-weight: 400;
+          font-size: 14px;
+          line-height: 19px;
+          text-align: center;
+          text-transform: uppercase;
+          color: #ffffff;
+          .arrow {
+            &:before {
+              border-right: 0.12em solid rgba(255, 255, 255, 1);
+              border-top: 0.12em solid rgba(255, 255, 255, 1);
+              position: absolute;
+              top: -10px;
+              left: 3px;
+            }
+          }
+        }
+        &.disabled {
+          &:nth-child(1),
+          &:last-child {
+            background: #ffede1;
+            color: rgba(54, 54, 54, 0.5);
+            .arrow {
+              &:before {
+                border-right: 0.12em solid rgba(54, 54, 54, 0.5);
+                border-top: 0.12em solid rgba(54, 54, 54, 0.5);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+export const ErrorMessageBlock = styled.span`
+  color: red;
 `;
