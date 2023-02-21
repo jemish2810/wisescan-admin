@@ -43,6 +43,38 @@ export const CommonForm = styled.form`
   .form-group {
     margin-bottom: 30px;
     text-align: left;
+    .basic-multi-select {
+      > div {
+        background: #f2f7ff;
+        border-radius: 6px;
+        height: 52px;
+        font-weight: 400;
+        font-size: 16px;
+        line-height: 22px;
+        color: rgba(54, 54, 54, 0.5);
+        width: 100%;
+        border: none;
+        font-family: "Open Sans", sans-serif;
+        outline: none;
+        padding: 0;
+        ::-webkit-input-placeholder {
+          /* Edge */
+          color: rgba(54, 54, 54, 0.5);
+        }
+
+        :-ms-input-placeholder {
+          /* Internet Explorer 10-11 */
+          color: rgba(54, 54, 54, 0.5);
+        }
+
+        ::placeholder {
+          color: rgba(54, 54, 54, 0.5);
+        }
+      }
+      #react-select-3-listbox {
+        height: auto;
+      }
+    }
     label {
       font-weight: 600;
       font-size: 16px;
@@ -282,6 +314,7 @@ export const CommonForm = styled.form`
       }
       .form-group {
         width: 100%;
+
         label {
           &.d-flex {
             display: flex;

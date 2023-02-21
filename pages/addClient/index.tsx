@@ -32,9 +32,9 @@ const addClientValidationSchema = yup.object({
   // pdf_flag: yup.bool().oneOf([true], "Checkbox selection is required"),
 });
 
-const AddClient = ({ editData }: any) => {
+const AddClient = ({ username }: any) => {
   const router = useRouter();
-  console.log('router: ', router);
+  console.log("router: ", router);
   const {
     register,
     handleSubmit,
@@ -43,6 +43,7 @@ const AddClient = ({ editData }: any) => {
   } = useForm({
     resolver: yupResolver(addClientValidationSchema),
   });
+  const [editData, setEditData] = useState<any>(null);
   console.log("editData :>> ", editData);
 
   useEffect(() => {
@@ -51,6 +52,20 @@ const AddClient = ({ editData }: any) => {
       return;
     }
   }, []);
+
+  useEffect(() => {
+    if (router?.query && router?.query?.username) {
+      fetchClient(router?.query?.username);
+    }
+  }, [router]);
+
+  const fetchClient = async (username: any) => {
+    if (username) {
+      let response = await asyncGetClient({ usrnme: username });
+      console.log("response :>> ", response);
+      setEditData(response);
+    }
+  };
 
   useEffect(() => {
     if (editData) {
@@ -82,13 +97,17 @@ const AddClient = ({ editData }: any) => {
   return (
     <>
       <Head>
-        {router.query.username ? <title>WiseScan | Edit Client</title>  : <title>WiseScan | Add New Client</title>}
+        {router.query.username ? (
+          <title>WiseScan | Edit Client</title>
+        ) : (
+          <title>WiseScan | Add New Client</title>
+        )}
       </Head>
       <Sidebar />
       <s.CommonDashboardBlock>
         <div className="dashboard-block-inner">
           <div className="title-block flex-block-inner">
-            <h3>{router.query.username ? "Edit Client" : "Add Client" }</h3>
+            <h3>{router.query.username ? "Edit Client" : "Add Client"}</h3>
             <p>
               <span>* </span>Denotes compulsory fields
             </p>
@@ -295,9 +314,6 @@ export default AddClient;
 
 AddClient.getInitialProps = async ({ query }: any) => {
   const { username } = query;
-  let editData = null;
-  if (username) {
-    editData = await asyncGetClient({ usrnme: username });
-  }
-  return { editData };
+
+  return { username };
 };

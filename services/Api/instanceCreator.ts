@@ -13,7 +13,7 @@ const instanceCreator = (baseUrl = null) => {
 
   // All custom header will pass into below object
   options.headers = {
-    customHeader: "customHeader",
+    // customHeader: "customHeader",
     "Content-Type": "application/json",
   };
 
