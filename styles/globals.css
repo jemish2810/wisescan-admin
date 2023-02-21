@@ -119,3 +119,29 @@ div#__next {
 html {
   height: 100%;
 }
+.swal2-popup .swal2-image {
+  width: 35px;
+  margin: 0;
+}
+.swal2-popup .swal2-title {
+  text-align: center;
+  margin: 0;
+  position: absolute;
+  top: 16px;
+  left: 30px;
+}
+
+.loader-main {
+  background-color: rgba(255, 255, 255, 0.5);
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  height: 100%;
+  width: 100%;
+}
+.loader-main > div {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

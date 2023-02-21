@@ -3,7 +3,7 @@ import { Circles } from "react-loader-spinner";
 const Loader = ({ isLoading }: any) => {
   return (
     isLoading && (
-      <div>
+      <div className="loader-main">
         <Circles
           height="60"
           width="60"

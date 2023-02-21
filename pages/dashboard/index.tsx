@@ -15,8 +15,8 @@ import { errorAlert, successAlert } from "@/utils/alerts";
 
 const Dashboard = () => {
   useEffect(() => {
-    errorAlert("something went wrong");
-    successAlert("good");
+    // errorAlert("something went wrong");
+    // successAlert("good");
 
     if (!checkIsAuth()) {
       Router.push("/");

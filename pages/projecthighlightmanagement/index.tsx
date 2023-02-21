@@ -160,13 +160,20 @@ const ProjectManagement = () => {
                   })}
                 </tbody>
               </table>
-              <Pagination
-                className="pagination-bar"
-                currentPage={currentPage}
-                totalCount={projectsData.length}
-                pageSize={PAGE_SIZE}
-                onPageChange={(page: any) => setCurrentPage(page)}
-              />
+              <div className="btn-pagination">
+                <div className="last-table-block">
+                  <button type="submit" className="btn common-button-black">
+                    View All
+                  </button>
+                </div>
+                <Pagination
+                  className="pagination-bar progessbar-custom-block"
+                  currentPage={currentPage}
+                  totalCount={projectsData.length}
+                  pageSize={PAGE_SIZE}
+                  onPageChange={(page: any) => setCurrentPage(page)}
+                />
+              </div>
               <div className="last-table-block">
                 <button type="submit" className="btn common-button-black">
                   View All
