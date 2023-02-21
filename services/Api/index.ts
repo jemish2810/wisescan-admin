@@ -11,7 +11,9 @@ export default class Api {
     console.log(this.instance);
   }
 
-  get(url: string, conf = {}, isErrorHandle = true, isSuccessHandle = true) {
+  get(url: string, conf = {
+    headers: { 'Content-Type': 'application/json'}
+  }, isErrorHandle = true, isSuccessHandle = true) {
     return this.instance
       .get(url, conf)
       .then((response: APIResponse) => {
