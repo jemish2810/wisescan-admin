@@ -9,9 +9,7 @@ export default class Api {
     this.instance = instanceCreator(baseUrl);
   }
 
-  get(url: string, conf = {
-    headers: { 'Content-Type': 'application/json'}
-  }, isErrorHandle = true, isSuccessHandle = true) {
+  get(url: string, conf = {}, isErrorHandle = true, isSuccessHandle = true) {
     return this.instance
       .get(url, conf)
       .then((response: APIResponse) => {
