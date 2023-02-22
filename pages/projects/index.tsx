@@ -3,7 +3,7 @@ import Link from "next/link";
 import Head from "next/head";
 import * as s from "../../styles/common.style";
 // import { Sidebar } from "../sidebar";
-import Sidebar from "../sidebar";
+import Sidebar from "../../src/components/sidebar";
 import Router, { useRouter } from "next/router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {

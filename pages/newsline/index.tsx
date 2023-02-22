@@ -5,7 +5,7 @@ import styles from "@/styles/Home.module.css";
 import Link from "next/link";
 import * as s from "../../styles/common.style";
 // import { Sidebar } from "../sidebar";
-import Sidebar from "../sidebar";
+import Sidebar from "../../src/components/sidebar";
 import moment from "moment-mini";
 
 import HomeIcon from "../../public/assets/home-icon.svg";

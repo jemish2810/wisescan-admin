@@ -2,7 +2,7 @@
 import Link from "next/link";
 import * as s from "../../styles/common.style";
 import Head from "next/head";
-import Sidebar from "../sidebar";
+import Sidebar from "../../src/components/sidebar";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { asyncGetNews, asyncSearchNews } from "@/services/news/news.service";

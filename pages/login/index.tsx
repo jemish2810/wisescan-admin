@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import Head from "next/head";
 import Image from "next/image";
 import { Inter } from "@next/font/google";
@@ -10,9 +11,10 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { asyncUserLogin } from "@/services/auth/auth.service";
 import { checkIsAuth } from "@/utils/globalFunctions";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { errorAlert, successAlert } from "@/utils/alerts";
 import { errorString } from "@/utils/constants";
+import Loader from "@/src/components/Loader";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,6 +27,7 @@ const validationSchema = yup
 
 export default function Home() {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
   const {
     register,
     handleSubmit,
@@ -36,7 +39,10 @@ export default function Home() {
   const onLogin = async (loginData: any) => {
     const { usnme, pwd } = loginData;
     if (usnme && pwd) {
+      setIsLoading(true);
       const response = await asyncUserLogin({ usnme, pwd });
+      setIsLoading(false);
+
       if (response && response?.data) {
         if (response?.data == "success") {
           successAlert("Login successfully");
@@ -120,6 +126,7 @@ export default function Home() {
             <img src="assets/banner-img.svg" alt="banner-img"></img>
           </div>
         </div>
+        <Loader isLoading={isLoading} />
       </s.LoginMain>
     </>
   );

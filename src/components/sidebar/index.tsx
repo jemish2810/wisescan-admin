@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Inter } from "@next/font/google";
 import styles from "@/styles/Home.module.css";
 import Link from "next/link";
-import * as s from "../../styles/common.style";
+import * as s from "../../../styles/common.style";
 import InlineSVG from "react-inlinesvg";
 import { asyncLogout } from "@/services/auth/auth.service";
 import Router, { useRouter } from "next/router";

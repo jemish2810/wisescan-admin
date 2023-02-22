@@ -1,5 +1,5 @@
 import * as s from "../../styles/common.style";
-import Sidebar from "../sidebar";
+import Sidebar from "../../src/components/sidebar";
 import Head from "next/head";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";

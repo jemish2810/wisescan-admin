@@ -5,7 +5,7 @@ import styles from "@/styles/Home.module.css";
 import Link from "next/link";
 import * as s from "../../styles/common.style";
 // import { Sidebar } from "../sidebar";
-import Sidebar from "../sidebar";
+import Sidebar from "../../src/components/sidebar";
 import Select from "react-select";
 
 import { yupResolver } from "@hookform/resolvers/yup";
