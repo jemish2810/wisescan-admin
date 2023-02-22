@@ -41,10 +41,10 @@ export const asyncLogout = async () => {
   }
 };
 
-export const asyncChangePassword = async (payload: any) => {
+export const asyncChangePassword = async (params: any) => {
   try {
     const response = await api
-      .put("/changePwd", payload)
+      .put("/changePwd", null, { params })
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
           return res;

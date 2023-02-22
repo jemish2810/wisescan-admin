@@ -63,11 +63,13 @@ const Changepassword = () => {
     setIsLoading(true);
     const usnme = readCookie(localStorageKeys.authKey);
     const response = await asyncChangePassword({
-      cur_pass,
+      curr_pass: cur_pass,
       new_pass,
       re_pass,
-      usrnme: usnme,
+      usnme,
     });
+    console.log('response: ', response);
+
     setIsLoading(false);
   };
 
