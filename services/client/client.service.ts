@@ -78,10 +78,10 @@ export const asyncDeleteClient = async (payload: any) => {
   }
 };
 
-export const asyncSearchClient = async (payload: any) => {
+export const asyncSearchClient = async (params: any) => {
   try {
     const response = await api
-      .get("/searchClient", { data: payload })
+      .get("/searchClient", { params })
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
           return res.data;
