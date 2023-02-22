@@ -15,9 +15,8 @@ export const asyncUserLogin = async (payload: any) => {
       .then(async (res: any) => {
         createCookie(localStorageKeys.authKey, usnme, 0);
         if (res && res?.isSuccess) {
-          Router.push(`/dashboard`);
+          return res;
         }
-        return res;
       });
     return response;
   } catch (e: any) {
@@ -44,10 +43,8 @@ export const asyncLogout = async () => {
 
 export const asyncChangePassword = async (payload: any) => {
   try {
-    const { cur_pass, new_pass, re_pass, usnme } = payload;
-    let params = { usnme, cur_pass, new_pass, re_pass };
     const response = await api
-      .put("/changePwd", params)
+      .put("/changePwd", payload)
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
           return res;

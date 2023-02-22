@@ -11,6 +11,7 @@ import Pagination from "@/src/components/Pagination";
 import { PAGE_SIZE } from "@/utils/constants";
 import Loader from "@/src/components/Loader";
 import { checkIsAuth } from "@/utils/globalFunctions";
+import { errorAlert } from "@/utils/alerts";
 
 const NewsLineManagement = () => {
   //States
@@ -19,6 +20,7 @@ const NewsLineManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [totalPageCount, setTotalPageCount] = useState(0);
   const [searchValue, setSearchValue] = useState("");
+  const [isViewAll, setIsViewAll] = useState(false);
 
   const router = useRouter();
   const dataFetchedRef = useRef(false);
@@ -42,7 +44,9 @@ const NewsLineManagement = () => {
     const totalPageCount = Math.ceil(data.length / PAGE_SIZE);
     setTotalPageCount(totalPageCount);
     if (news && news.data) {
-      setNewsData(news.data);
+      let newsArr = [];
+      newsArr.push(news.data);
+      setNewsData(newsArr);
     }
   };
 
@@ -50,21 +54,38 @@ const NewsLineManagement = () => {
   const currentTableData = useMemo(() => {
     const firstPageIndex = (currentPage - 1) * PAGE_SIZE;
     const lastPageIndex = firstPageIndex + PAGE_SIZE;
-
-    return newsData.slice(firstPageIndex, lastPageIndex);
-  }, [currentPage, newsData]);
+    const totalPageCount = Math.ceil(newsData.length / PAGE_SIZE);
+    setTotalPageCount(totalPageCount);
+    return isViewAll
+      ? newsData
+      : newsData?.slice(firstPageIndex, lastPageIndex);
+  }, [currentPage, newsData, isViewAll]);
 
   //Other methods
   const handleOnChangeSearch = (event: any) => {
     const { value } = event.target;
+    if (value?.trim()?.length == "0") {
+      fetchNews();
+    }
     setSearchValue(value);
   };
 
   const handleOnClickSearch = async () => {
     if (searchValue) {
-      const searchData = await asyncSearchNews({ news: searchValue });
-      setNewsData(searchData);
+      setIsLoading(true);
+      const response = await asyncSearchNews({ news: searchValue });
+      setIsLoading(false);
+      if (response) {
+        if (response?.data) {
+          setNewsData(response?.data);
+        }
+        errorAlert(response);
+      }
     }
+  };
+
+  const handleOnClickViewAll = () => {
+    setIsViewAll((prev) => !prev);
   };
 
   //render methods
@@ -89,7 +110,8 @@ const NewsLineManagement = () => {
           <div className="table-block-common">
             <div className="title-block-list">
               <p>
-                News, Listing 1 to {PAGE_SIZE} of 27 [Page {currentPage} of
+                News, Listing 1 to {PAGE_SIZE} of {newsData?.length} [Page{" "}
+                {currentPage} of
                 {totalPageCount}]
               </p>
               <div className="input-group mb-3">
@@ -121,17 +143,17 @@ const NewsLineManagement = () => {
                     <th>News Title</th>
                     <th>Start Date</th>
                     <th>News Description</th>
-                    <th>Action</th>
+                    {/* <th>Action</th> */}
                   </tr>
                 </thead>
                 <tbody>
                   {currentTableData.map((item: any, index: number) => {
                     return (
                       <tr key={index}>
-                        <td>{item?.news || item?.id}News Title Here</td>
-                        <td>{item?.start_date}03-Dec-2022</td>
-                        <td>{item?.desc}Lorem Ipsum is simply dummy</td>
-                        <td>
+                        <td>{item?.news || item?.id}</td>
+                        <td>{item?.start_date}</td>
+                        <td>{item?.description}</td>
+                        {/* <td>
                           <div className="action-block">
                             <Link href="">
                               <img src="assets/edit-icon.svg" alt="edit-icon" />
@@ -143,7 +165,7 @@ const NewsLineManagement = () => {
                               />
                             </Link>
                           </div>
-                        </td>
+                        </td> */}
                       </tr>
                     );
                   })}
@@ -151,23 +173,22 @@ const NewsLineManagement = () => {
               </table>
               <div className="btn-pagination">
                 <div className="last-table-block">
-                  <button type="submit" className="btn common-button-black">
-                    View All
+                  <button
+                    className="btn common-button-black"
+                    onClick={handleOnClickViewAll}
+                  >
+                    {isViewAll ? `View By Page` : `View All`}
                   </button>
                 </div>
-                <Pagination
-                  className="pagination-bar progessbar-custom-block"
-                  currentPage={currentPage}
-                  totalCount={newsData.length}
-                  pageSize={PAGE_SIZE}
-                  onPageChange={(page: any) => setCurrentPage(page)}
-                />
-                <Loader />
-              </div>
-              <div className="last-table-block">
-                <button type="submit" className="btn common-button-black">
-                  View All
-                </button>
+                {!isViewAll && (
+                  <Pagination
+                    className="pagination-bar progessbar-custom-block"
+                    currentPage={currentPage}
+                    totalCount={newsData.length}
+                    pageSize={PAGE_SIZE}
+                    onPageChange={(page: any) => setCurrentPage(page)}
+                  />
+                )}
               </div>
             </s.TableCommon>
           </div>

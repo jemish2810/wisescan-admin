@@ -9,7 +9,7 @@ export const asyncGetAllProjects = async () => {
   try {
     const response = await api.get("/getAllProjects").then(async (res: any) => {
       if (res && res?.isSuccess) {
-        return res.data;
+        return res;
       }
     });
     return response;
@@ -21,7 +21,7 @@ export const asyncGetAllProjects = async () => {
 export const asyncGetProject = async (payload: any) => {
   try {
     const response = await api
-      .get("/getProjects", { data: payload })
+      .get("/getProjects", { params: payload })
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
           return res.data;
@@ -36,7 +36,7 @@ export const asyncGetProject = async (payload: any) => {
 export const asyncAddProject = async (payload: any) => {
   try {
     const response = await api
-      .post("/addProject", payload)
+      .post("/addProjects", payload)
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
           return res.data;
@@ -51,7 +51,7 @@ export const asyncAddProject = async (payload: any) => {
 export const asyncUpdateProject = async (payload: any) => {
   try {
     const response = await api
-      .put("/updateProject", payload)
+      .put("/updateProject", null, { params: payload })
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
           return res.data;
@@ -66,7 +66,7 @@ export const asyncUpdateProject = async (payload: any) => {
 export const asyncDeleteProject = async (payload: any) => {
   try {
     const response = await api
-      .delete("/deleteProject", { data: payload })
+      .delete("/deleteProject", null, { params: payload })
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
           return res.data;
@@ -81,10 +81,10 @@ export const asyncDeleteProject = async (payload: any) => {
 export const asyncSearchProject = async (payload: any) => {
   try {
     const response = await api
-      .get("/searchProject", { data: payload })
+      .get("/searchProject", { params: payload })
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
-          return res.data;
+          return res;
         }
       });
     return response;
@@ -126,7 +126,7 @@ export const asyncAddProjectHighlights = async (payload: any) => {
 export const asyncSearchProjectHighlights = async (payload: any) => {
   try {
     const response = await api
-      .get("/searchProjectHighlights", { data: payload })
+      .get("/searchProjectHighlights", { params: payload })
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
           return res;

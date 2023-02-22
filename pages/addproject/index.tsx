@@ -17,12 +17,19 @@ import {
   asyncGetProject,
   asyncUpdateProject,
 } from "@/services/project/project.service";
-import { DAYS, DUMMY_CLIENTS, MONTHS, YEARS } from "@/utils/constants";
+import {
+  DAYS,
+  DUMMY_CLIENTS,
+  errorString,
+  MONTHS,
+  YEARS,
+} from "@/utils/constants";
 import { useEffect, useRef, useState } from "react";
 import { asyncGetAllClients } from "@/services/client/client.service";
 import Router from "next/router";
 import { checkIsAuth } from "@/utils/globalFunctions";
-import { useRouter } from 'next/router';
+import { useRouter } from "next/router";
+import { errorAlert, successAlert } from "@/utils/alerts";
 
 const addProjectValidationSchema = yup.object({
   code: yup.string(),
@@ -34,7 +41,7 @@ const addProjectValidationSchema = yup.object({
   endYear: yup.number().required("End date is required"),
   p_name: yup.string().required("Project name is required"),
   dev: yup.string().required("Developer is required"),
-  const: yup.string().required("Consultant is required"),
+  consultant: yup.string().required("Consultant is required"),
   cont: yup.string().required("Main Contractor  is required"),
   period: yup.string().required("Contractual Period is required"),
   geo: yup.string().required("Geo-technical is required"),
@@ -61,14 +68,22 @@ const AddProject = ({ editData }: any) => {
   };
 
   useEffect(() => {
-    if (editData) {
-      setValue("code", editData?.code);
-      setValue("cont", editData?.cont);
-      setValue("const", editData?.const);
-      setValue("dev", editData?.dev);
-      setValue("geo", editData?.geo);
-      setValue("p_name", editData?.p_name);
-      setValue("period", editData?.period);
+    if (editData && editData?.length > 0) {
+      const data = editData[0];
+      setValue("code", data?.code);
+      setValue("cont", data?.cont);
+      setValue("consultant", data?.consultant);
+      setValue("dev", data?.dev);
+      setValue("geo", data?.geo);
+      setValue("p_name", data?.p_name);
+      setValue("period", data?.period);
+      setValue("startDay", data?.start_date?.split("-")?.[0]);
+      setValue("startMonth", data?.start_date?.split("-")?.[1]);
+      setValue("startYear", data?.start_date?.split("-")?.[2]);
+      setValue("endDay", data?.end_date?.split("-")?.[0]);
+      setValue("endMonth", data?.end_date?.split("-")?.[1]);
+      setValue("endYear", data?.end_date?.split("-")?.[2]);
+      fetchClients();
     }
   }, [editData, setValue]);
 
@@ -86,13 +101,29 @@ const AddProject = ({ editData }: any) => {
     const response = await asyncGetAllClients();
     if (response && response.data) {
       const newOptions = response.data.map((item: any) => {
-        return { value: item.c_name, label: item.c_name };
+        return { value: item.usrnme, label: item.usrnme };
       });
+      if (editData && editData?.length > 0) {
+        const data = editData[0];
+        const filterData: any = [];
+        let abc: any = [];
+        if (typeof data?.a_cname == "string") {
+          abc = data?.a_cname?.split(",");
+        }
+        newOptions.forEach((item: any) => {
+          if (abc?.some((name: any) => item.value === name)) {
+            filterData.push(item);
+          }
+          return;
+        });
+        if (filterData && filterData?.length > 0) {
+          setSelectedOption(filterData);
+        }
+      }
       setOptions(newOptions);
     }
   };
 
-  console.log("errors", errors);
   const onSubmitProduct = async (data: any) => {
     const {
       code,
@@ -107,6 +138,7 @@ const AddProject = ({ editData }: any) => {
       cont,
       period,
       geo,
+      consultant,
     } = data;
     if (!selectedOption) {
       setError("clients", {
@@ -114,16 +146,13 @@ const AddProject = ({ editData }: any) => {
       });
       return;
     }
-    const a_cnames = selectedOption?.map((item: any) => {
-      return item.c_name;
+    const a_cname = selectedOption?.map((item: any) => {
+      return item.value;
     });
-    console.log("selectedOption :>> ", selectedOption);
     let start_date = startDay + "-" + startMonth + "-" + startYear;
     let end_date = endDay + "-" + endMonth + "-" + endYear;
-    console.log("start_date :>> ", start_date);
     const isStartDateValid = moment(start_date, "DD-M-YYYY").isValid();
     const isEndDateValid = moment(end_date, "DD-M-YYYY").isValid();
-    console.log("isStartDateValid :>> ", isStartDateValid);
     if (!isStartDateValid) {
       setError("invalidStartDate", {
         message: "Please enter valid start date",
@@ -136,43 +165,48 @@ const AddProject = ({ editData }: any) => {
       });
       return;
     }
-    if (editData) {
-      const response = asyncUpdateProject({
-        code,
-        p_name,
-        start_date,
-        end_date,
-        dev,
-        cont,
-        period,
-        geo,
-        a_cnames,
-      });
-    } else {
-      const response = asyncAddProject({
-        code,
-        p_name,
-        start_date,
-        end_date,
-        dev,
-        cont,
-        period,
-        geo,
-        a_cnames,
-      });
-      console.log("response :>> ", response);
+
+    const params = {
+      code,
+      p_name,
+      start_date,
+      end_date,
+      dev,
+      cont,
+      period,
+      geo,
+      abc: "test",
+      c_name: "0001",
+      a_cname: a_cname?.toString(),
+      consultant,
+    };
+
+    const response = editData
+      ? await asyncUpdateProject(params)
+      : await asyncAddProject(params);
+    if (response) {
+      if (response?.success) {
+        successAlert(`Project ${editData ? "updated" : "added"} successfully`);
+        Router.back();
+      } else {
+        errorAlert(response || errorString.catchError);
+      }
     }
   };
   return (
     <>
       <Head>
-        {router.query?.code ? <title>WiseScan | Edit Project</title> : <title>WiseScan | Add Project</title>}
+        {router.query?.code ? (
+          <title>WiseScan | Edit Project</title>
+        ) : (
+          <title>WiseScan | Add Project</title>
+        )}
       </Head>
       <Sidebar />
       <s.CommonDashboardBlock>
         <div className="dashboard-block-inner">
           <div className="title-block flex-block-inner">
-            <h3>Add Projects</h3>
+            <h3>{editData ? `Update Project` : ` Add Project`}</h3>
             <p>
               <span>* </span> Denotes compulsory fields
             </p>
@@ -232,11 +266,11 @@ const AddProject = ({ editData }: any) => {
                     type="text"
                     className="form-control"
                     placeholder="Consultant"
-                    {...register("const", { required: true })}
+                    {...register("consultant", { required: true })}
                   ></input>
-                  {errors?.const && (
+                  {errors?.consultant && (
                     <s.ErrorMessageBlock>
-                      {errors?.const?.message}
+                      {errors?.consultant?.message}
                     </s.ErrorMessageBlock>
                   )}
                 </div>
@@ -423,7 +457,7 @@ const AddProject = ({ editData }: any) => {
               <div className="common-form-block-inner">
                 <div className="last-btn">
                   <button type="submit" className="btn common-button-yellow">
-                    Add New Project
+                    {editData ? `Update Project` : ` Add New Project`}
                   </button>
                 </div>
               </div>

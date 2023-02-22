@@ -37,7 +37,6 @@ const Newsline = () => {
   } = useForm({
     resolver: yupResolver(addNewsLineValidationSchema),
   });
-  console.log(errors);
 
   useEffect(() => {
     if (!checkIsAuth()) {
