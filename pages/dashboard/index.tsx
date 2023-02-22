@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import Head from "next/head";
 import Image from "next/image";
 import { Inter } from "@next/font/google";
@@ -43,7 +44,9 @@ const Dashboard = () => {
                 </div>
                 <div className="block-content">
                   <h3>Administrator</h3>
-                  <p>Change Password?</p>
+                  <p onClick={() => Router.push("/changepassword")}>
+                    Change Password?
+                  </p>
                 </div>
               </div>
             </div>
@@ -57,8 +60,11 @@ const Dashboard = () => {
                 </div>
                 <div className="block-content">
                   <h3>ATms@net</h3>
-                  <p>
-                    Client Management <br></br> Project Management
+                  <p onClick={() => Router.push("/clients")}>
+                    Client Management
+                  </p>
+                  <p onClick={() => Router.push("/projects")}>
+                    Project Management
                   </p>
                 </div>
               </div>
@@ -70,8 +76,11 @@ const Dashboard = () => {
                 </div>
                 <div className="block-content">
                   <h3>Website</h3>
-                  <p>
-                    Project Highlight <br></br> News Line
+                  <p onClick={() => Router.push("/projecthighlightmanagement")}>
+                    Project Highlight
+                  </p>
+                  <p onClick={() => Router.push("/newslinemanagement")}>
+                    News Line
                   </p>
                 </div>
               </div>

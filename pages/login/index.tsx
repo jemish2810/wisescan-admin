@@ -11,6 +11,8 @@ import * as yup from "yup";
 import { asyncUserLogin } from "@/services/auth/auth.service";
 import { checkIsAuth } from "@/utils/globalFunctions";
 import { useEffect } from "react";
+import { errorAlert, successAlert } from "@/utils/alerts";
+import { errorString } from "@/utils/constants";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -35,11 +37,16 @@ export default function Home() {
     const { usnme, pwd } = loginData;
     if (usnme && pwd) {
       const response = await asyncUserLogin({ usnme, pwd });
-      router.push("/dashboard");
-      console.log("response :>> ", response);
+      if (response && response?.data) {
+        if (response?.data == "success") {
+          successAlert("Login successfully");
+          router.push("/dashboard");
+          return;
+        }
+        errorAlert(response?.data || errorString.catchError);
+      }
     }
   };
-  console.log(errors);
   useEffect(() => {
     if (checkIsAuth()) {
       Router.push("/dashboard");

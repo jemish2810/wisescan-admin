@@ -16,11 +16,16 @@ import {
   asyncGetAllClients,
   asyncSearchClient,
 } from "@/services/client/client.service";
-import { DUMMY_CLIENTS, localStorageKeys } from "@/utils/constants";
+import {
+  DUMMY_CLIENTS,
+  errorString,
+  localStorageKeys,
+  PAGE_SIZE,
+} from "@/utils/constants";
 import Loader from "@/src/components/Loader";
 import { readCookie } from "@/utils/cookieCreator";
 import { checkIsAuth } from "@/utils/globalFunctions";
-let PAGE_SIZE = 15;
+import { errorAlert, successAlert } from "@/utils/alerts";
 
 const Clients = () => {
   const router = useRouter();
@@ -30,6 +35,8 @@ const Clients = () => {
   const [clientData, setClientData] = useState<any>([]);
   const [searchValue, setSearchValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isViewAll, setIsViewAll] = useState(false);
+
   const dataFetchedRef = useRef(false);
 
   useEffect(() => {
@@ -55,16 +62,25 @@ const Clients = () => {
   const currentTableData = useMemo(() => {
     const firstPageIndex = (currentPage - 1) * PAGE_SIZE;
     const lastPageIndex = firstPageIndex + PAGE_SIZE;
-    setTotalCount(lastPageIndex);
-    console.log("clientData :>> ", clientData);
-    return clientData.slice(firstPageIndex, lastPageIndex);
-  }, [currentPage, clientData]);
+    const totalPageCount = Math.ceil(clientData.length / PAGE_SIZE);
+    setTotalCount(totalPageCount);
+    return isViewAll
+      ? clientData
+      : clientData.slice(firstPageIndex, lastPageIndex);
+  }, [currentPage, clientData, isViewAll]);
 
   const handleOnClickDelete = async (data: any) => {
-    // console.log("data :>> ", data);
-    const deleteData = await asyncDeleteClient({ usname: data.usrnme });
-    console.log("deleteData :>> ", deleteData);
-    fetchClients();
+    setIsLoading(true);
+    const response = await asyncDeleteClient({ usrnme: data.usrnme });
+    if (response) {
+      if (response?.success) {
+        successAlert(`Client deleted successfully`);
+        fetchClients();
+      } else {
+        setIsLoading(false);
+        errorAlert(response || errorString.catchError);
+      }
+    }
   };
 
   const handleOnClickUpdate = async (data: any) => {
@@ -76,17 +92,25 @@ const Clients = () => {
 
   const handleOnChangeSearch = (event: any) => {
     const { value } = event.target;
+    if (value?.trim()?.length == "0") {
+      fetchClients();
+    }
     setSearchValue(value);
   };
 
   const handleOnClickSearch = async () => {
     if (searchValue) {
+      setIsLoading(true);
       const response = await asyncSearchClient({ c_name: searchValue });
-      console.log("response :>> ", response);
+      setIsLoading(false);
       if (response && response.data) {
         setClientData(response.data);
       }
     }
+  };
+
+  const handleOnClickViewAll = () => {
+    setIsViewAll((prev) => !prev);
   };
 
   return (
@@ -110,8 +134,8 @@ const Clients = () => {
           <div className="table-block-common">
             <div className="title-block-list">
               <p>
-                Client, Listing 1 to 15 of 27 [Page {currentPage} of{" "}
-                {totalCount}]
+                Client, Listing 1 to {PAGE_SIZE} of {clientData?.length} [Page
+                {currentPage} of {totalCount}]
               </p>
               <div className="input-group mb-3">
                 <input
@@ -145,8 +169,8 @@ const Clients = () => {
                     <tr>
                       <th>
                         <div className="form-group">
-                          <input type="checkbox" checked></input>
-                          <label></label>
+                          <input id="selectAll" type="checkbox"></input>
+                          <label htmlFor="selectAll"></label>
                         </div>
                       </th>
                       <th>Organization</th>
@@ -162,8 +186,12 @@ const Clients = () => {
                         <tr key={index}>
                           <td>
                             <div className="form-group">
-                              <input type="checkbox"></input>
-                              <label></label>
+                              <input
+                                name={item?.c_name}
+                                type="checkbox"
+                                id={item?.c_name + index}
+                              ></input>
+                              <label htmlFor={item?.c_name + index}></label>
                             </div>
                           </td>
                           <td>{item?.org_name}</td>
@@ -202,22 +230,22 @@ const Clients = () => {
                 </table>
                 <div className="btn-pagination">
                   <div className="last-table-block">
-                    <button type="submit" className="btn common-button-black">
-                      View All
+                    <button
+                      className="btn common-button-black"
+                      onClick={handleOnClickViewAll}
+                    >
+                      {isViewAll ? `View By Page` : `View All`}
                     </button>
                   </div>
-                  <Pagination
-                    className="pagination-bar progessbar-custom-block"
-                    currentPage={currentPage}
-                    totalCount={clientData.length}
-                    pageSize={PAGE_SIZE}
-                    onPageChange={(page: any) => setCurrentPage(page)}
-                  />
-                </div>
-                <div className="last-table-block">
-                  <button type="submit" className="btn common-button-black">
-                    Add Client
-                  </button>
+                  {!isViewAll && (
+                    <Pagination
+                      className="pagination-bar progessbar-custom-block"
+                      currentPage={currentPage}
+                      totalCount={clientData.length}
+                      pageSize={PAGE_SIZE}
+                      onPageChange={(page: any) => setCurrentPage(page)}
+                    />
+                  )}
                 </div>
               </s.TableCommon>
             )}

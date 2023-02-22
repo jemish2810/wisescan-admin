@@ -19,6 +19,9 @@ import {
 } from "@/services/client/client.service";
 import { useEffect, useState } from "react";
 import { checkIsAuth } from "@/utils/globalFunctions";
+import Loader from "@/src/components/Loader";
+import { errorAlert, successAlert } from "@/utils/alerts";
+import { errorString } from "@/utils/constants";
 
 const addClientValidationSchema = yup.object({
   org_nam: yup.string().required("Organization name is required"),
@@ -29,22 +32,24 @@ const addClientValidationSchema = yup.object({
   phone: yup.string().required("Contact No is required"),
   pwd: yup.string().required("Password is required"),
   status: yup.string().required("Status is required"),
-  // pdf_flag: yup.bool().oneOf([true], "Checkbox selection is required"),
 });
 
-const AddClient = ({ username }: any) => {
+const AddClient = () => {
   const router = useRouter();
-  console.log("router: ", router);
   const {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(addClientValidationSchema),
   });
   const [editData, setEditData] = useState<any>(null);
-  console.log("editData :>> ", editData);
+  const [isLoading, setIsLoading] = useState(false);
+  const pdf_flag = watch("pdf_flag");
+  const xls_flag = watch("xls_flag");
+  const gdb_flag = watch("gdb_flag");
 
   useEffect(() => {
     if (!checkIsAuth()) {
@@ -61,8 +66,9 @@ const AddClient = ({ username }: any) => {
 
   const fetchClient = async (username: any) => {
     if (username) {
+      setIsLoading(true);
       let response = await asyncGetClient({ usrnme: username });
-      console.log("response :>> ", response);
+      setIsLoading(false);
       setEditData(response);
     }
   };
@@ -83,17 +89,45 @@ const AddClient = ({ username }: any) => {
       setValue("is_admin", editData?.is_admin);
     }
   }, [editData, setValue]);
-  console.log("errors :>> ", errors);
+
   const onSubmitProjectHighlight = async (data: any) => {
-    console.log("data :>> ", data);
-    if (editData) {
-      const response = await asyncUpdateClient({ ...data });
-      if (response?.success) Router.back();
-      return;
+    setIsLoading(true);
+    const response = editData
+      ? await asyncUpdateClient({ ...data })
+      : await asyncAddClient({ ...data });
+    setIsLoading(false);
+    if (response) {
+      if (response?.success) {
+        successAlert(`Client ${editData ? "updated" : "added"} successfully`);
+        Router.back();
+      } else {
+        errorAlert(response || errorString.catchError);
+      }
     }
-    const response = await asyncAddClient({ ...data });
-    if (response?.success) Router.back();
   };
+
+  const handleAllCheckBoxChanges = (event: any) => {
+    const { checked, name } = event.target;
+    // setValue(name, checked);
+    if (name == "all") {
+      if (checked) {
+        setValue("gdb_flag", true);
+        setValue("xls_flag", true);
+        setValue("pdf_flag", true);
+      } else {
+        setValue("gdb_flag", false);
+        setValue("xls_flag", false);
+        setValue("pdf_flag", false);
+      }
+    }
+    // else if (gdb_flag && xls_flag && pdf_flag) {
+    //   setValue("all", true);
+    // }
+    else {
+      setValue("all", false);
+    }
+  };
+
   return (
     <>
       <Head>
@@ -104,209 +138,224 @@ const AddClient = ({ username }: any) => {
         )}
       </Head>
       <Sidebar />
-      <s.CommonDashboardBlock>
-        <div className="dashboard-block-inner">
-          <div className="title-block flex-block-inner">
-            <h3>{router.query.username ? "Edit Client" : "Add Client"}</h3>
-            <p>
-              <span>* </span>Denotes compulsory fields
-            </p>
-          </div>
-          <div className="change-password-block">
-            <s.CommonForm
-              className="common-form-block"
-              onSubmit={handleSubmit(onSubmitProjectHighlight)}
-            >
-              <div className="form-group">
-                <label>
-                  Organization <span>*</span>
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Enter Organization"
-                  {...register("org_nam", { required: true })}
-                ></input>
-                {errors?.org_nam && (
-                  <s.ErrorMessageBlock>
-                    {errors?.org_nam?.message}
-                  </s.ErrorMessageBlock>
-                )}
-              </div>
-              <div className="form-group">
-                <label>
-                  Salutation | Name <span> *</span>
-                </label>
-                <div className="form-group-day">
-                  <div className="form-group-day-inner">
-                    <select {...register("sal", { required: true })}>
-                      <option selected disabled>
-                        Select
-                      </option>
-                      <option>123</option>
-                    </select>
-                  </div>
+      {isLoading ? (
+        <Loader isLoading={isLoading} />
+      ) : (
+        <s.CommonDashboardBlock>
+          <div className="dashboard-block-inner">
+            <div className="title-block flex-block-inner">
+              <h3>{router.query.username ? "Edit Client" : "Add Client"}</h3>
+              <p>
+                <span>* </span>Denotes compulsory fields
+              </p>
+            </div>
+            <div className="change-password-block">
+              <s.CommonForm
+                className="common-form-block"
+                onSubmit={handleSubmit(onSubmitProjectHighlight)}
+              >
+                <div className="form-group">
+                  <label>
+                    Organization <span>*</span>
+                  </label>
                   <input
                     type="text"
                     className="form-control"
-                    placeholder="Enter name"
-                    {...register("c_name", { required: true })}
+                    placeholder="Enter Organization"
+                    {...register("org_nam", { required: true })}
                   ></input>
-                </div>
-                {errors?.c_name && (
-                  <s.ErrorMessageBlock>
-                    {errors?.c_name?.message}
-                  </s.ErrorMessageBlock>
-                )}
-                {errors?.sal && (
-                  <s.ErrorMessageBlock>
-                    {errors?.sal?.message}
-                  </s.ErrorMessageBlock>
-                )}
-              </div>
-              <div className="form-group">
-                <label>
-                  Email <span>*</span>
-                </label>
-                <input
-                  id=""
-                  className="form-control"
-                  placeholder="Enter Email"
-                  {...register("email", { required: true })}
-                ></input>
-                {errors?.email && (
-                  <s.ErrorMessageBlock>
-                    {errors?.email?.message}
-                  </s.ErrorMessageBlock>
-                )}
-              </div>
-              <div className="form-group">
-                <label>
-                  Contact No <span>*</span>
-                </label>
-                <input
-                  id=""
-                  className="form-control"
-                  placeholder="Enter contact no"
-                  {...register("phone", { required: true })}
-                ></input>
-                {errors?.phone && (
-                  <s.ErrorMessageBlock>
-                    {errors?.phone?.message}
-                  </s.ErrorMessageBlock>
-                )}
-              </div>
-              <div className="form-group">
-                <label>
-                  Username <span>*</span>
-                </label>
-                <input
-                  id=""
-                  className="form-control"
-                  placeholder="Enter username"
-                  {...register("usrnme", { required: true })}
-                ></input>
-                {errors?.usrnme && (
-                  <s.ErrorMessageBlock>
-                    {errors?.usrnme?.message}
-                  </s.ErrorMessageBlock>
-                )}
-              </div>
-              <div className="form-group">
-                <label>
-                  Password <span>*</span>
-                </label>
-                <input
-                  id=""
-                  className="form-control"
-                  placeholder="Enter password"
-                  {...register("pwd", { required: true })}
-                ></input>
-                {errors?.pwd && (
-                  <s.ErrorMessageBlock>
-                    {errors?.pwd?.message}
-                  </s.ErrorMessageBlock>
-                )}
-              </div>
-              <div className="form-group">
-                <label className="pb-14">
-                  File Type <span>*</span>
-                </label>
-                <div className="checkbox-control-main">
-                  <div className="custom-checkbox">
-                    <input
-                      id="pdf_flag"
-                      type="checkbox"
-                      {...register("pdf_flag")}
-                    />
-                    <label htmlFor="pdf_flag">PDF</label>
-                  </div>
-                  <div className="custom-checkbox">
-                    <input
-                      id="xls_flag"
-                      type="checkbox"
-                      {...register("xls_flag")}
-                    />
-                    <label htmlFor="xls_flag">Excel(XLS)</label>
-                  </div>
-                  <div className="custom-checkbox">
-                    <input
-                      type="checkbox"
-                      {...register("gdb_flag")}
-                      id="gdb_flag"
-                    />
-                    <label htmlFor="gdb_flag">Excel(GDB)</label>
-                  </div>
-                  <div className="custom-checkbox">
-                    <input type="checkbox" {...register("all")} id="all" />
-                    <label htmlFor="all">All</label>
-                  </div>
-                </div>
-              </div>
-              <div className="form-group permission-form-group">
-                <div className="checkbox-control-main">
-                  <label className="pb-14">Permission</label>
-                  <div className="custom-checkbox">
-                    <input
-                      type="checkbox"
-                      {...register("is_admin")}
-                      id="is_admin"
-                    />
-                    <label htmlFor="is_admin">Administrator</label>
-                  </div>
-                </div>
-                <div className="check-block-permission">
-                  <label>
-                    Status <span> *</span>
-                  </label>
-                  <div className="form-group-day">
-                    <div className="form-group-day-inner">
-                      <select {...register("status", { required: true })}>
-                        <option selected disabled>
-                          Select
-                        </option>
-                        <option value="active">Active</option>
-                        <option value="pending">Pending</option>
-                        <option value="inActive">In Active</option>
-                      </select>
-                    </div>
-                  </div>
-                  {errors?.status && (
+                  {errors?.org_nam && (
                     <s.ErrorMessageBlock>
-                      {errors?.status?.message}
+                      {errors?.org_nam?.message}
                     </s.ErrorMessageBlock>
                   )}
                 </div>
-              </div>
-              <div className="last-btn">
-                <button type="submit" className="btn common-button-yellow">
-                  {editData ? `Update` : `Add`}
-                </button>
-              </div>
-            </s.CommonForm>
+                <div className="form-group">
+                  <label>
+                    Salutation | Name <span> *</span>
+                  </label>
+                  <div className="form-group-day">
+                    <div className="form-group-day-inner">
+                      <select {...register("sal", { required: true })}>
+                        <option selected disabled>
+                          Select
+                        </option>
+                        <option value="Mr">Mr</option>
+                        <option value="Mrs">Mrs</option>
+                        <option value="Ms">Ms</option>
+                      </select>
+                    </div>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Enter name"
+                      {...register("c_name", { required: true })}
+                    ></input>
+                  </div>
+                  {errors?.c_name && (
+                    <s.ErrorMessageBlock>
+                      {errors?.c_name?.message}
+                    </s.ErrorMessageBlock>
+                  )}
+                  {errors?.sal && (
+                    <s.ErrorMessageBlock>
+                      {errors?.sal?.message}
+                    </s.ErrorMessageBlock>
+                  )}
+                </div>
+                <div className="form-group">
+                  <label>
+                    Email <span>*</span>
+                  </label>
+                  <input
+                    id=""
+                    className="form-control"
+                    placeholder="Enter Email"
+                    {...register("email", { required: true })}
+                  ></input>
+                  {errors?.email && (
+                    <s.ErrorMessageBlock>
+                      {errors?.email?.message}
+                    </s.ErrorMessageBlock>
+                  )}
+                </div>
+                <div className="form-group">
+                  <label>
+                    Contact No <span>*</span>
+                  </label>
+                  <input
+                    id=""
+                    className="form-control"
+                    placeholder="Enter contact no"
+                    {...register("phone", { required: true })}
+                  ></input>
+                  {errors?.phone && (
+                    <s.ErrorMessageBlock>
+                      {errors?.phone?.message}
+                    </s.ErrorMessageBlock>
+                  )}
+                </div>
+                <div className="form-group">
+                  <label>
+                    Username <span>*</span>
+                  </label>
+                  <input
+                    id=""
+                    className="form-control"
+                    placeholder="Enter username"
+                    {...register("usrnme", { required: true })}
+                  ></input>
+                  {errors?.usrnme && (
+                    <s.ErrorMessageBlock>
+                      {errors?.usrnme?.message}
+                    </s.ErrorMessageBlock>
+                  )}
+                </div>
+                <div className="form-group">
+                  <label>
+                    Password <span>*</span>
+                  </label>
+                  <input
+                    id=""
+                    type="password"
+                    className="form-control"
+                    placeholder="Enter password"
+                    {...register("pwd", { required: true })}
+                  ></input>
+                  {errors?.pwd && (
+                    <s.ErrorMessageBlock>
+                      {errors?.pwd?.message}
+                    </s.ErrorMessageBlock>
+                  )}
+                </div>
+                <div className="form-group">
+                  <label className="pb-14">
+                    File Type <span>*</span>
+                  </label>
+                  <div className="checkbox-control-main">
+                    <div className="custom-checkbox">
+                      <input
+                        id="pdf_flag"
+                        type="checkbox"
+                        {...register("pdf_flag")}
+                        onChange={handleAllCheckBoxChanges}
+                      />
+                      <label htmlFor="pdf_flag">PDF</label>
+                    </div>
+                    <div className="custom-checkbox">
+                      <input
+                        id="xls_flag"
+                        type="checkbox"
+                        {...register("xls_flag")}
+                        onChange={handleAllCheckBoxChanges}
+                      />
+                      <label htmlFor="xls_flag">Excel(XLS)</label>
+                    </div>
+                    <div className="custom-checkbox">
+                      <input
+                        type="checkbox"
+                        {...register("gdb_flag")}
+                        id="gdb_flag"
+                        onChange={handleAllCheckBoxChanges}
+                      />
+                      <label htmlFor="gdb_flag">Excel(GDB)</label>
+                    </div>
+                    <div className="custom-checkbox">
+                      <input
+                        type="checkbox"
+                        {...register("all")}
+                        id="all"
+                        onChange={handleAllCheckBoxChanges}
+                      />
+                      <label htmlFor="all">All</label>
+                    </div>
+                  </div>
+                </div>
+                <div className="form-group permission-form-group">
+                  <div className="checkbox-control-main">
+                    <label className="pb-14">Permission</label>
+                    <div className="custom-checkbox">
+                      <input
+                        type="checkbox"
+                        {...register("is_admin")}
+                        id="is_admin"
+                      />
+                      <label htmlFor="is_admin">Administrator</label>
+                    </div>
+                  </div>
+                  <div className="check-block-permission">
+                    <label>
+                      Status <span> *</span>
+                    </label>
+                    <div className="form-group-day">
+                      <div className="form-group-day-inner">
+                        <select {...register("status", { required: true })}>
+                          <option selected disabled>
+                            Select
+                          </option>
+                          <option value="active">Active</option>
+                          <option value="pending">Pending</option>
+                          <option value="inActive">In Active</option>
+                        </select>
+                      </div>
+                    </div>
+                    {errors?.status && (
+                      <s.ErrorMessageBlock>
+                        {errors?.status?.message}
+                      </s.ErrorMessageBlock>
+                    )}
+                  </div>
+                </div>
+                <div className="last-btn">
+                  <button type="submit" className="btn common-button-yellow">
+                    {editData ? `Update` : `Add`}
+                  </button>
+                </div>
+              </s.CommonForm>
+            </div>
           </div>
-        </div>
-      </s.CommonDashboardBlock>
+        </s.CommonDashboardBlock>
+      )}
     </>
   );
 };

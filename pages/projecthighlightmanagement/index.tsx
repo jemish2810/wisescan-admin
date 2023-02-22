@@ -13,6 +13,7 @@ import { PAGE_SIZE } from "@/utils/constants";
 import Pagination from "@/src/components/Pagination";
 import Loader from "@/src/components/Loader";
 import { checkIsAuth } from "@/utils/globalFunctions";
+import { errorAlert } from "@/utils/alerts";
 
 const ProjectManagement = () => {
   const router = useRouter();
@@ -23,6 +24,7 @@ const ProjectManagement = () => {
   const [projectsData, setProjectsData] = useState<any>([]);
   const [searchValue, setSearchValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isViewAll, setIsViewAll] = useState(false);
 
   useEffect(() => {
     if (!checkIsAuth()) {
@@ -46,13 +48,18 @@ const ProjectManagement = () => {
   const currentTableData = useMemo(() => {
     const firstPageIndex = (currentPage - 1) * PAGE_SIZE;
     const lastPageIndex = firstPageIndex + PAGE_SIZE;
-    setTotalCount(lastPageIndex);
-    console.log("projectsData :>> ", projectsData);
-    return projectsData.slice(firstPageIndex, lastPageIndex);
-  }, [currentPage, projectsData]);
+    const totalPageCount = Math.ceil(projectsData.length / PAGE_SIZE);
+    setTotalCount(totalPageCount);
+    return isViewAll
+      ? projectsData
+      : projectsData.slice(firstPageIndex, lastPageIndex);
+  }, [currentPage, projectsData, isViewAll]);
 
   const handleOnChangeSearch = (event: any) => {
     const { value } = event.target;
+    if (value?.trim()?.length == "0") {
+      fetchProjectHighlight();
+    }
     setSearchValue(value);
   };
 
@@ -61,11 +68,18 @@ const ProjectManagement = () => {
       const response = await asyncSearchProjectHighlights({
         p_name: searchValue,
       });
-      console.log("response :>> ", response);
-      if (response && response.data) {
-        setProjectsData(response.data);
+      setIsLoading(false);
+      if (response) {
+        if (response?.data) {
+          setProjectsData(response?.data);
+        }
+        errorAlert(response);
       }
     }
+  };
+
+  const handleOnClickViewAll = () => {
+    setIsViewAll((prev) => !prev);
   };
   return (
     <>
@@ -88,14 +102,14 @@ const ProjectManagement = () => {
           <div className="table-block-common">
             <div className="title-block-list">
               <p>
-                Project, Listing 1 to 10 of 27 [Page {currentPage} of{" "}
-                {totalCount}]
+                Project, Listing 1 to {PAGE_SIZE} of {projectsData?.length}{" "}
+                [Page {currentPage} of {totalCount}]
               </p>
               <div className="input-group mb-3">
                 <input
                   type="text"
                   className="form-control"
-                  placeholder="Search client by name"
+                  placeholder="Search by project name"
                   aria-label="Recipient's username"
                   aria-describedby="button-addon2"
                   value={searchValue}
@@ -121,7 +135,7 @@ const ProjectManagement = () => {
                     <th>Project name</th>
                     <th>Rank Priority</th>
                     <th>Project Write Up</th>
-                    <th>Action</th>
+                    {/* <th>Action</th> */}
                   </tr>
                 </thead>
                 <tbody>
@@ -139,7 +153,7 @@ const ProjectManagement = () => {
                         <td>{item?.p_name}</td>
                         <td>{item?.rank}</td>
                         <td>{item?.desc}</td>
-                        <td>
+                        {/* <td>
                           <div className="action-block">
                             <Link href="#">
                               <img
@@ -154,7 +168,7 @@ const ProjectManagement = () => {
                               ></img>
                             </Link>
                           </div>
-                        </td>
+                        </td> */}
                       </tr>
                     );
                   })}
@@ -162,22 +176,22 @@ const ProjectManagement = () => {
               </table>
               <div className="btn-pagination">
                 <div className="last-table-block">
-                  <button type="submit" className="btn common-button-black">
-                    View All
+                  <button
+                    className="btn common-button-black"
+                    onClick={handleOnClickViewAll}
+                  >
+                    {isViewAll ? `View By Page` : `View All`}
                   </button>
                 </div>
-                <Pagination
-                  className="pagination-bar progessbar-custom-block"
-                  currentPage={currentPage}
-                  totalCount={projectsData.length}
-                  pageSize={PAGE_SIZE}
-                  onPageChange={(page: any) => setCurrentPage(page)}
-                />
-              </div>
-              <div className="last-table-block">
-                <button type="submit" className="btn common-button-black">
-                  View All
-                </button>
+                {!isViewAll && (
+                  <Pagination
+                    className="pagination-bar progessbar-custom-block"
+                    currentPage={currentPage}
+                    totalCount={projectsData.length}
+                    pageSize={PAGE_SIZE}
+                    onPageChange={(page: any) => setCurrentPage(page)}
+                  />
+                )}
               </div>
             </s.TableCommon>
           </div>

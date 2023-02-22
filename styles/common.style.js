@@ -523,6 +523,7 @@ export const CommonDashboardBlock = styled.div`
               font-size: 16px;
               line-height: 22px;
               color: #e6813f;
+              cursor: pointer;
             }
           }
         }

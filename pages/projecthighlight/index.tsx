@@ -47,7 +47,6 @@ const ProjectHighlight = () => {
       rank,
       pic_url: picture?.[0]?.name,
     });
-    console.log("response :>> ", response);
     if (response?.success) {
       successAlert("Project highlight added successfully");
       Router.back();
