@@ -7,8 +7,6 @@ export default class Api {
 
   constructor(baseUrl = null) {
     this.instance = instanceCreator(baseUrl);
-
-    console.log(this.instance);
   }
 
   get(url: string, conf = {}, isErrorHandle = true, isSuccessHandle = true) {
@@ -42,7 +40,7 @@ export default class Api {
 
   delete(
     url: string,
-    data = {},
+    data: any = {},
     conf = {},
     isErrorHandle = true,
     isSuccessHandle = true
@@ -126,7 +124,7 @@ export default class Api {
 
   put(
     url: string,
-    data = {},
+    data: any = {},
     conf = {},
     isErrorHandle = true,
     isSuccessHandle = true

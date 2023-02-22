@@ -5,17 +5,18 @@ import styles from "@/styles/Home.module.css";
 import Link from "next/link";
 import * as s from "../../styles/common.style";
 // import { Sidebar } from "../sidebar";
-import Sidebar from "../sidebar";
+import Sidebar from "../../src/components/sidebar";
 
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { asyncChangePassword } from "@/services/auth/auth.service";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { checkIsAuth } from "@/utils/globalFunctions";
 import Router from "next/router";
 import { readCookie } from "@/utils/cookieCreator";
 import { localStorageKeys } from "@/utils/constants";
+import Loader from "@/src/components/Loader";
 
 const addProjectValidationSchema = yup
   .object({
@@ -47,7 +48,8 @@ const Changepassword = () => {
   } = useForm({
     resolver: yupResolver(addProjectValidationSchema),
   });
-  console.log(errors);
+
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (!checkIsAuth()) {
@@ -58,14 +60,15 @@ const Changepassword = () => {
 
   const onSubmitChangePassword = async (data: any) => {
     const { cur_pass, new_pass, re_pass } = data;
+    setIsLoading(true);
     const usnme = readCookie(localStorageKeys.authKey);
     const response = await asyncChangePassword({
       cur_pass,
       new_pass,
       re_pass,
-      usnme,
+      usrnme: usnme,
     });
-    console.log("response :>> ", response);
+    setIsLoading(false);
   };
 
   return (
@@ -74,6 +77,7 @@ const Changepassword = () => {
         <title>WiseScan | Change Password</title>
       </Head>
       <Sidebar />
+
       <s.CommonDashboardBlock>
         <div className="dashboard-block-inner">
           <div className="title-block">
@@ -154,6 +158,7 @@ const Changepassword = () => {
             </p>
           </div>
         </div>
+        <Loader isLoading={isLoading} />
       </s.CommonDashboardBlock>
     </>
   );

@@ -1,5 +1,5 @@
 import * as s from "../../styles/common.style";
-import Sidebar from "../sidebar";
+import Sidebar from "../../src/components/sidebar";
 import Head from "next/head";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
@@ -47,7 +47,6 @@ const ProjectHighlight = () => {
       rank,
       pic_url: picture?.[0]?.name,
     });
-    console.log("response :>> ", response);
     if (response?.success) {
       successAlert("Project highlight added successfully");
       Router.back();

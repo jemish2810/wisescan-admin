@@ -1,7 +1,7 @@
 import { getYear } from "./globalFunctions";
 
 export const errorString = {
-  catchError: "SOMETHING_WENT_WRONG",
+  catchError: "Something went wrong, Please try after some time",
   authError: "INVALID_AUTH_CRED",
   userIsNotLoggedIn: "USER_IS_NOT_LOGGED_IN",
 };

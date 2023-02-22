@@ -6,7 +6,7 @@ import styles from "@/styles/Home.module.css";
 import Link from "next/link";
 import * as s from "../../styles/common.style";
 // import { Sidebar } from "../sidebar";
-import Sidebar from "../sidebar";
+import Sidebar from "../../src/components/sidebar";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import data from "../../utils/mockData.json";
@@ -16,11 +16,16 @@ import {
   asyncGetAllClients,
   asyncSearchClient,
 } from "@/services/client/client.service";
-import { DUMMY_CLIENTS, localStorageKeys } from "@/utils/constants";
+import {
+  DUMMY_CLIENTS,
+  errorString,
+  localStorageKeys,
+  PAGE_SIZE,
+} from "@/utils/constants";
 import Loader from "@/src/components/Loader";
 import { readCookie } from "@/utils/cookieCreator";
 import { checkIsAuth } from "@/utils/globalFunctions";
-let PAGE_SIZE = 15;
+import { errorAlert, successAlert } from "@/utils/alerts";
 
 const Clients = () => {
   const router = useRouter();
@@ -30,6 +35,8 @@ const Clients = () => {
   const [clientData, setClientData] = useState<any>([]);
   const [searchValue, setSearchValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isViewAll, setIsViewAll] = useState(false);
+
   const dataFetchedRef = useRef(false);
 
   useEffect(() => {
@@ -55,16 +62,25 @@ const Clients = () => {
   const currentTableData = useMemo(() => {
     const firstPageIndex = (currentPage - 1) * PAGE_SIZE;
     const lastPageIndex = firstPageIndex + PAGE_SIZE;
-    setTotalCount(lastPageIndex);
-    console.log("clientData :>> ", clientData);
-    return clientData.slice(firstPageIndex, lastPageIndex);
-  }, [currentPage, clientData]);
+    const totalPageCount = Math.ceil(clientData.length / PAGE_SIZE);
+    setTotalCount(totalPageCount);
+    return isViewAll
+      ? clientData
+      : clientData.slice(firstPageIndex, lastPageIndex);
+  }, [currentPage, clientData, isViewAll]);
 
   const handleOnClickDelete = async (data: any) => {
-    // console.log("data :>> ", data);
-    const deleteData = await asyncDeleteClient({ usname: data.usrnme });
-    console.log("deleteData :>> ", deleteData);
-    fetchClients();
+    setIsLoading(true);
+    const response = await asyncDeleteClient({ usrnme: data.usrnme });
+    if (response) {
+      if (response?.success) {
+        successAlert(`Client deleted successfully`);
+        fetchClients();
+      } else {
+        setIsLoading(false);
+        errorAlert(response || errorString.catchError);
+      }
+    }
   };
 
   const handleOnClickUpdate = async (data: any) => {
@@ -76,17 +92,25 @@ const Clients = () => {
 
   const handleOnChangeSearch = (event: any) => {
     const { value } = event.target;
+    if (value?.trim()?.length == "0") {
+      fetchClients();
+    }
     setSearchValue(value);
   };
 
   const handleOnClickSearch = async () => {
     if (searchValue) {
+      setIsLoading(true);
       const response = await asyncSearchClient({ c_name: searchValue });
-      console.log("response :>> ", response);
+      setIsLoading(false);
       if (response && response.data) {
         setClientData(response.data);
       }
     }
+  };
+
+  const handleOnClickViewAll = () => {
+    setIsViewAll((prev) => !prev);
   };
 
   return (
@@ -110,8 +134,8 @@ const Clients = () => {
           <div className="table-block-common">
             <div className="title-block-list">
               <p>
-                Client, Listing 1 to 15 of 27 [Page {currentPage} of{" "}
-                {totalCount}]
+                Client, Listing 1 to {PAGE_SIZE} of {clientData?.length} [Page
+                {currentPage} of {totalCount}]
               </p>
               <div className="input-group mb-3">
                 <input
@@ -136,84 +160,89 @@ const Clients = () => {
               </div>
             </div>
 
-            {isLoading ? (
-              <Loader isLoading={isLoading} />
-            ) : (
-              <s.TableCommon>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>
-                        <div className="form-group">
-                          <input type="checkbox" checked></input>
-                          <label></label>
-                        </div>
-                      </th>
-                      <th>Organization</th>
-                      <th>Status</th>
-                      <th>Name</th>
-                      <th>Username</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentTableData.map((item: any, index: number) => {
-                      return (
-                        <tr key={index}>
-                          <td>
-                            <div className="form-group">
-                              <input type="checkbox"></input>
-                              <label></label>
-                            </div>
-                          </td>
-                          <td>{item?.org_name}</td>
-                          <td>{item?.status}</td>
-                          <td>{item?.c_name}</td>
-                          <td>
-                            <span className="highlight">{item?.usrnme}</span>
-                          </td>
-                          <td>
-                            <div className="action-block">
-                              <Link
-                                href=""
-                                onClick={() => handleOnClickUpdate(item)}
-                              >
-                                <img
-                                  src="assets/edit-icon.svg"
-                                  alt="edit-icon"
-                                />
-                              </Link>
-                              <Link
-                                href=""
-                                className="delete-icon"
-                                onClick={() => handleOnClickDelete(item)}
-                              >
-                                <img
-                                  src="assets/trash-icon.svg"
-                                  alt="trash-icon"
-                                />
-                              </Link>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-                <Pagination
-                  className="pagination-bar"
-                  currentPage={currentPage}
-                  totalCount={clientData.length}
-                  pageSize={PAGE_SIZE}
-                  onPageChange={(page: any) => setCurrentPage(page)}
-                />
+            <s.TableCommon>
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      <div className="form-group">
+                        <input id="selectAll" type="checkbox"></input>
+                        <label htmlFor="selectAll"></label>
+                      </div>
+                    </th>
+                    <th>Organization</th>
+                    <th>Status</th>
+                    <th>Name</th>
+                    <th>Username</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentTableData.map((item: any, index: number) => {
+                    return (
+                      <tr key={index}>
+                        <td>
+                          <div className="form-group">
+                            <input
+                              name={item?.c_name}
+                              type="checkbox"
+                              id={item?.c_name + index}
+                            ></input>
+                            <label htmlFor={item?.c_name + index}></label>
+                          </div>
+                        </td>
+                        <td>{item?.org_name}</td>
+                        <td>{item?.status}</td>
+                        <td>{item?.c_name}</td>
+                        <td>
+                          <span className="highlight">{item?.usrnme}</span>
+                        </td>
+                        <td>
+                          <div className="action-block">
+                            <Link
+                              href=""
+                              onClick={() => handleOnClickUpdate(item)}
+                            >
+                              <img src="assets/edit-icon.svg" alt="edit-icon" />
+                            </Link>
+                            <Link
+                              href=""
+                              className="delete-icon"
+                              onClick={() => handleOnClickDelete(item)}
+                            >
+                              <img
+                                src="assets/trash-icon.svg"
+                                alt="trash-icon"
+                              />
+                            </Link>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              <div className="btn-pagination">
                 <div className="last-table-block">
-                  <button type="submit" className="btn common-button-black">
-                    Add Client
+                  <button
+                    className="btn common-button-black"
+                    onClick={handleOnClickViewAll}
+                  >
+                    {isViewAll ? `View By Page` : `View All`}
                   </button>
                 </div>
-              </s.TableCommon>
-            )}
+                {!isViewAll && (
+                  <Pagination
+                    className="pagination-bar progessbar-custom-block"
+                    currentPage={currentPage}
+                    totalCount={clientData.length}
+                    pageSize={PAGE_SIZE}
+                    onPageChange={(page: any) => setCurrentPage(page)}
+                  />
+                )}
+              </div>
+            </s.TableCommon>
+            <Loader isLoading={isLoading} />
           </div>
         </div>
       </s.CommonDashboardBlock>

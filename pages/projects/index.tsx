@@ -3,7 +3,7 @@ import Link from "next/link";
 import Head from "next/head";
 import * as s from "../../styles/common.style";
 // import { Sidebar } from "../sidebar";
-import Sidebar from "../sidebar";
+import Sidebar from "../../src/components/sidebar";
 import Router, { useRouter } from "next/router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -11,10 +11,11 @@ import {
   asyncDeleteProject,
   asyncSearchProject,
 } from "@/services/project/project.service";
-import { PAGE_SIZE } from "@/utils/constants";
+import { errorString, PAGE_SIZE } from "@/utils/constants";
 import Pagination from "@/src/components/Pagination";
 import Loader from "@/src/components/Loader";
 import { checkIsAuth } from "@/utils/globalFunctions";
+import { errorAlert, successAlert } from "@/utils/alerts";
 
 const Project = () => {
   //States
@@ -24,6 +25,7 @@ const Project = () => {
   const [projectsData, setProjectsData] = useState<any>([]);
   const [searchValue, setSearchValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isViewAll, setIsViewAll] = useState(false);
 
   //Hooks
   const router = useRouter();
@@ -54,15 +56,25 @@ const Project = () => {
   const currentTableData = useMemo(() => {
     const firstPageIndex = (currentPage - 1) * PAGE_SIZE;
     const lastPageIndex = firstPageIndex + PAGE_SIZE;
-    setTotalCount(lastPageIndex);
-    console.log("projectsData :>> ", projectsData);
-    return projectsData.slice(firstPageIndex, lastPageIndex);
-  }, [currentPage, projectsData]);
+    const totalPageCount = Math.ceil(projectsData.length / PAGE_SIZE);
+    setTotalCount(totalPageCount);
+    return isViewAll
+      ? projectsData
+      : projectsData.slice(firstPageIndex, lastPageIndex);
+  }, [currentPage, projectsData, isViewAll]);
 
   const handleOnClickDelete = async (data: any) => {
-    const deleteData = await asyncDeleteProject({ code: data.code });
-    // console.log("deleteData :>> ", deleteData);
-    fetchProjects();
+    setIsLoading(true);
+    const response = await asyncDeleteProject({ code: data.code });
+    setIsLoading(false);
+    if (response) {
+      if (response?.success) {
+        successAlert(`Project deleted successfully`);
+        fetchProjects();
+      } else {
+        errorAlert(response || errorString.catchError);
+      }
+    }
   };
 
   const handleOnClickUpdate = async (data: any) => {
@@ -74,17 +86,25 @@ const Project = () => {
 
   const handleOnChangeSearch = (event: any) => {
     const { value } = event.target;
+    if (value?.trim()?.length == "0") {
+      fetchProjects();
+    }
     setSearchValue(value);
   };
 
   const handleOnClickSearch = async () => {
     if (searchValue) {
+      setIsLoading(true);
       const response = await asyncSearchProject({ p_name: searchValue });
-      console.log("response :>> ", response);
+      setIsLoading(false);
       if (response && response.data) {
         setProjectsData(response.data);
       }
     }
+  };
+
+  const handleOnClickViewAll = () => {
+    setIsViewAll((prev) => !prev);
   };
 
   return (
@@ -108,8 +128,8 @@ const Project = () => {
           <div className="table-block-common">
             <div className="title-block-list">
               <p>
-                Client, Listing 1 to 15 of 27 [Page {currentPage} of
-                {totalCount}]
+                Project, Listing 1 to {PAGE_SIZE} of {projectsData?.length}
+                [Page {currentPage} of {totalCount}]
               </p>
               <div className="input-group mb-3">
                 <input
@@ -146,11 +166,9 @@ const Project = () => {
                   {currentTableData.map((item: any, index: number) => {
                     return (
                       <tr key={index}>
+                        <td>{item?.p_name}</td>
                         <td>
-                          20-STOREY MEDICAL BUILDING AT VICTORIA STREET - EB
-                        </td>
-                        <td>
-                          <span className="highlight">8242J</span>
+                          <span className="highlight">{item?.code}</span>
                         </td>
                         <td>
                           <div className="action-block">
@@ -180,17 +198,24 @@ const Project = () => {
                   })}
                 </tbody>
               </table>
-              <Pagination
-                className="pagination-bar"
-                currentPage={currentPage}
-                totalCount={projectsData.length}
-                pageSize={PAGE_SIZE}
-                onPageChange={(page: any) => setCurrentPage(page)}
-              />
-              <div className="last-table-block">
-                <button type="submit" className="btn common-button-black">
-                  View All
-                </button>
+              <div className="btn-pagination">
+                <div className="last-table-block">
+                  <button
+                    className="btn common-button-black"
+                    onClick={handleOnClickViewAll}
+                  >
+                    {isViewAll ? `View By Page` : `View All`}
+                  </button>
+                </div>
+                {!isViewAll && (
+                  <Pagination
+                    className="pagination-bar progessbar-custom-block"
+                    currentPage={currentPage}
+                    totalCount={projectsData.length}
+                    pageSize={PAGE_SIZE}
+                    onPageChange={(page: any) => setCurrentPage(page)}
+                  />
+                )}
               </div>
             </s.TableCommon>
           </div>

@@ -4,19 +4,20 @@ import Image from "next/image";
 import { Inter } from "@next/font/google";
 import styles from "@/styles/Home.module.css";
 import Link from "next/link";
-import * as s from "../../styles/common.style";
+import * as s from "../../../styles/common.style";
 import InlineSVG from "react-inlinesvg";
 import { asyncLogout } from "@/services/auth/auth.service";
 import Router, { useRouter } from "next/router";
+import { successAlert } from "@/utils/alerts";
 
 const Sidebar = () => {
   const handleOnClickSignOut = async () => {
     await asyncLogout();
+    successAlert("Logout successfully");
     Router.push(`/login`);
   };
   const router = useRouter();
   const currentRoute = router.pathname;
-  console.log("currentRoute :>> ", currentRoute);
   return (
     <>
       <s.SidebarMain>

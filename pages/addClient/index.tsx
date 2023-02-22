@@ -5,7 +5,7 @@ import styles from "@/styles/Home.module.css";
 import Link from "next/link";
 import * as s from "../../styles/common.style";
 // import { Sidebar } from "../sidebar";
-import Sidebar from "../sidebar";
+import Sidebar from "../../src/components/sidebar";
 import Router, { useRouter } from "next/router";
 
 import HomeIcon from "../../public/assets/home-icon.svg";
@@ -19,6 +19,9 @@ import {
 } from "@/services/client/client.service";
 import { useEffect, useState } from "react";
 import { checkIsAuth } from "@/utils/globalFunctions";
+import Loader from "@/src/components/Loader";
+import { errorAlert, successAlert } from "@/utils/alerts";
+import { errorString } from "@/utils/constants";
 
 const addClientValidationSchema = yup.object({
   org_nam: yup.string().required("Organization name is required"),
@@ -29,21 +32,24 @@ const addClientValidationSchema = yup.object({
   phone: yup.string().required("Contact No is required"),
   pwd: yup.string().required("Password is required"),
   status: yup.string().required("Status is required"),
-  // pdf_flag: yup.bool().oneOf([true], "Checkbox selection is required"),
 });
 
-const AddClient = ({ editData }: any) => {
+const AddClient = () => {
   const router = useRouter();
-  console.log('router: ', router);
   const {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(addClientValidationSchema),
   });
-  console.log("editData :>> ", editData);
+  const [editData, setEditData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const pdf_flag = watch("pdf_flag");
+  const xls_flag = watch("xls_flag");
+  const gdb_flag = watch("gdb_flag");
 
   useEffect(() => {
     if (!checkIsAuth()) {
@@ -51,6 +57,21 @@ const AddClient = ({ editData }: any) => {
       return;
     }
   }, []);
+
+  useEffect(() => {
+    if (router?.query && router?.query?.username) {
+      fetchClient(router?.query?.username);
+    }
+  }, [router]);
+
+  const fetchClient = async (username: any) => {
+    if (username) {
+      setIsLoading(true);
+      let response = await asyncGetClient({ usrnme: username });
+      setIsLoading(false);
+      setEditData(response);
+    }
+  };
 
   useEffect(() => {
     if (editData) {
@@ -68,27 +89,60 @@ const AddClient = ({ editData }: any) => {
       setValue("is_admin", editData?.is_admin);
     }
   }, [editData, setValue]);
-  console.log("errors :>> ", errors);
+
   const onSubmitProjectHighlight = async (data: any) => {
-    console.log("data :>> ", data);
-    if (editData) {
-      const response = await asyncUpdateClient({ ...data });
-      if (response?.success) Router.back();
-      return;
+    setIsLoading(true);
+    const response = editData
+      ? await asyncUpdateClient({ ...data })
+      : await asyncAddClient({ ...data });
+    setIsLoading(false);
+    if (response) {
+      if (response?.success) {
+        successAlert(`Client ${editData ? "updated" : "added"} successfully`);
+        Router.back();
+      } else {
+        errorAlert(response || errorString.catchError);
+      }
     }
-    const response = await asyncAddClient({ ...data });
-    if (response?.success) Router.back();
   };
+
+  const handleAllCheckBoxChanges = (event: any) => {
+    const { checked, name } = event.target;
+    // setValue(name, checked);
+    if (name == "all") {
+      if (checked) {
+        setValue("gdb_flag", true);
+        setValue("xls_flag", true);
+        setValue("pdf_flag", true);
+      } else {
+        setValue("gdb_flag", false);
+        setValue("xls_flag", false);
+        setValue("pdf_flag", false);
+      }
+    }
+    // else if (gdb_flag && xls_flag && pdf_flag) {
+    //   setValue("all", true);
+    // }
+    else {
+      setValue("all", false);
+    }
+  };
+
   return (
     <>
       <Head>
-        {router.query.username ? <title>WiseScan | Edit Client</title>  : <title>WiseScan | Add New Client</title>}
+        {router.query.username ? (
+          <title>WiseScan | Edit Client</title>
+        ) : (
+          <title>WiseScan | Add New Client</title>
+        )}
       </Head>
       <Sidebar />
+
       <s.CommonDashboardBlock>
         <div className="dashboard-block-inner">
           <div className="title-block flex-block-inner">
-            <h3>{router.query.username ? "Edit Client" : "Add Client" }</h3>
+            <h3>{router.query.username ? "Edit Client" : "Add Client"}</h3>
             <p>
               <span>* </span>Denotes compulsory fields
             </p>
@@ -124,7 +178,9 @@ const AddClient = ({ editData }: any) => {
                       <option selected disabled>
                         Select
                       </option>
-                      <option>123</option>
+                      <option value="Mr">Mr</option>
+                      <option value="Mrs">Mrs</option>
+                      <option value="Ms">Ms</option>
                     </select>
                   </div>
                   <input
@@ -199,6 +255,7 @@ const AddClient = ({ editData }: any) => {
                 </label>
                 <input
                   id=""
+                  type="password"
                   className="form-control"
                   placeholder="Enter password"
                   {...register("pwd", { required: true })}
@@ -219,6 +276,7 @@ const AddClient = ({ editData }: any) => {
                       id="pdf_flag"
                       type="checkbox"
                       {...register("pdf_flag")}
+                      onChange={handleAllCheckBoxChanges}
                     />
                     <label htmlFor="pdf_flag">PDF</label>
                   </div>
@@ -227,6 +285,7 @@ const AddClient = ({ editData }: any) => {
                       id="xls_flag"
                       type="checkbox"
                       {...register("xls_flag")}
+                      onChange={handleAllCheckBoxChanges}
                     />
                     <label htmlFor="xls_flag">Excel(XLS)</label>
                   </div>
@@ -235,11 +294,17 @@ const AddClient = ({ editData }: any) => {
                       type="checkbox"
                       {...register("gdb_flag")}
                       id="gdb_flag"
+                      onChange={handleAllCheckBoxChanges}
                     />
                     <label htmlFor="gdb_flag">Excel(GDB)</label>
                   </div>
                   <div className="custom-checkbox">
-                    <input type="checkbox" {...register("all")} id="all" />
+                    <input
+                      type="checkbox"
+                      {...register("all")}
+                      id="all"
+                      onChange={handleAllCheckBoxChanges}
+                    />
                     <label htmlFor="all">All</label>
                   </div>
                 </div>
@@ -288,6 +353,7 @@ const AddClient = ({ editData }: any) => {
           </div>
         </div>
       </s.CommonDashboardBlock>
+      <Loader isLoading={isLoading} />
     </>
   );
 };
@@ -295,9 +361,6 @@ export default AddClient;
 
 AddClient.getInitialProps = async ({ query }: any) => {
   const { username } = query;
-  let editData = null;
-  if (username) {
-    editData = await asyncGetClient({ usrnme: username });
-  }
-  return { editData };
+
+  return { username };
 };

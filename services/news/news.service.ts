@@ -39,7 +39,7 @@ export const asyncSearchNews = async (payload: any) => {
       .get("/searchNews", { data: payload })
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
-          return res.data;
+          return res;
         }
       });
     return response;

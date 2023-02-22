@@ -21,7 +21,7 @@ export const asyncGetAllClients = async () => {
 export const asyncGetClient = async (payload: any) => {
   try {
     const response = await api
-      .get("/getClient", { data: payload })
+      .get("/getClient", { params: payload })
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
           return res.data;
@@ -51,7 +51,7 @@ export const asyncAddClient = async (payload: any) => {
 export const asyncUpdateClient = async (payload: any) => {
   try {
     const response = await api
-      .put("/updateClient", payload)
+      .put("/updateClient", null, { params: payload })
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
           return res.data;
@@ -66,7 +66,7 @@ export const asyncUpdateClient = async (payload: any) => {
 export const asyncDeleteClient = async (payload: any) => {
   try {
     const response = await api
-      .delete("/deleteClient", { data: payload })
+      .delete("/deleteClient", null, { params: payload })
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
           return res.data;
@@ -78,10 +78,10 @@ export const asyncDeleteClient = async (payload: any) => {
   }
 };
 
-export const asyncSearchClient = async (params: any) => {
+export const asyncSearchClient = async (payload: any) => {
   try {
     const response = await api
-      .get("/searchClient", { params })
+      .get("/searchClient", { params: payload })
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
           return res.data;
