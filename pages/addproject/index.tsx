@@ -41,7 +41,7 @@ const addProjectValidationSchema = yup.object({
   endYear: yup.number().required("End date is required"),
   p_name: yup.string().required("Project name is required"),
   dev: yup.string().required("Developer is required"),
-  consultant: yup.string().required("Consultant is required"),
+  constr: yup.string().required("Consultant is required"),
   cont: yup.string().required("Main Contractor  is required"),
   period: yup.string().required("Contractual Period is required"),
   geo: yup.string().required("Geo-technical is required"),
@@ -72,7 +72,7 @@ const AddProject = ({ editData }: any) => {
       const data = editData[0];
       setValue("code", data?.code);
       setValue("cont", data?.cont);
-      setValue("consultant", data?.consultant);
+      setValue("constr", data?.consultant);
       setValue("dev", data?.dev);
       setValue("geo", data?.geo);
       setValue("p_name", data?.p_name);
@@ -138,7 +138,7 @@ const AddProject = ({ editData }: any) => {
       cont,
       period,
       geo,
-      consultant,
+      constr,
     } = data;
     if (!selectedOption) {
       setError("clients", {
@@ -178,7 +178,7 @@ const AddProject = ({ editData }: any) => {
       abc: "test",
       c_name: "0001",
       a_cname: a_cname?.toString(),
-      consultant,
+      constr,
     };
 
     const response = editData
@@ -266,11 +266,11 @@ const AddProject = ({ editData }: any) => {
                     type="text"
                     className="form-control"
                     placeholder="Consultant"
-                    {...register("consultant", { required: true })}
+                    {...register("constr", { required: true })}
                   ></input>
-                  {errors?.consultant && (
+                  {errors?.constr && (
                     <s.ErrorMessageBlock>
-                      {errors?.consultant?.message}
+                      {errors?.constr?.message}
                     </s.ErrorMessageBlock>
                   )}
                 </div>

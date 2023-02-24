@@ -24,7 +24,7 @@ import { errorAlert, successAlert } from "@/utils/alerts";
 import { errorString } from "@/utils/constants";
 
 const addClientValidationSchema = yup.object({
-  org_nam: yup.string().required("Organization name is required"),
+  org_name: yup.string().required("Organization name is required"),
   sal: yup.string().required("Salutation is required"),
   c_name: yup.string().required("Name is required"),
   email: yup.string().required("Name is required"),
@@ -75,7 +75,7 @@ const AddClient = () => {
 
   useEffect(() => {
     if (editData) {
-      setValue("org_nam", editData?.org_name);
+      setValue("org_name", editData?.org_name);
       setValue("sal", editData?.sal);
       setValue("c_name", editData?.c_name);
       setValue("email", editData?.email);
@@ -93,7 +93,7 @@ const AddClient = () => {
   const onSubmitProjectHighlight = async (data: any) => {
     setIsLoading(true);
     const response = editData
-      ? await asyncUpdateClient({ ...data })
+      ? await asyncUpdateClient({ ...data, original_username: router?.query?.username })
       : await asyncAddClient({ ...data });
     setIsLoading(false);
     if (response) {
@@ -160,11 +160,11 @@ const AddClient = () => {
                   type="text"
                   className="form-control"
                   placeholder="Enter Organization"
-                  {...register("org_nam", { required: true })}
+                  {...register("org_name", { required: true })}
                 ></input>
-                {errors?.org_nam && (
+                {errors?.org_name && (
                   <s.ErrorMessageBlock>
-                    {errors?.org_nam?.message}
+                    {errors?.org_name?.message}
                   </s.ErrorMessageBlock>
                 )}
               </div>

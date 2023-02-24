@@ -61,12 +61,11 @@ const Changepassword = () => {
   const onSubmitChangePassword = async (data: any) => {
     const { cur_pass, new_pass, re_pass } = data;
     setIsLoading(true);
-    const usnme = readCookie(localStorageKeys.authKey);
+    // const usrnme = readCookie(localStorageKeys.authKey);
     const response = await asyncChangePassword({
       curr_pass: cur_pass,
       new_pass,
       re_pass,
-      usnme,
     });
     console.log('response: ', response);
 

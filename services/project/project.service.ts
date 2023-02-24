@@ -36,7 +36,7 @@ export const asyncGetProject = async (payload: any) => {
 export const asyncAddProject = async (payload: any) => {
   try {
     const response = await api
-      .post("/addProjects", payload)
+      .post("/addProject", payload)
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
           return res.data;
