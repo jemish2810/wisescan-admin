@@ -5,14 +5,18 @@ import Head from "next/head";
 import Sidebar from "../../src/components/sidebar";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { asyncGetNews, asyncSearchNews } from "@/services/news/news.service";
+import {
+  asyncDeleteNews,
+  asyncGetAllNews,
+  asyncSearchNews,
+} from "@/services/news/news.service";
 import data from "../../utils/mockData.json";
 import Pagination from "@/src/components/Pagination";
 import { PAGE_SIZE } from "@/utils/constants";
 import Loader from "@/src/components/Loader";
 import { checkIsAuth } from "@/utils/globalFunctions";
-import { errorAlert } from "@/utils/alerts";
-import { errorString } from '../../utils/constants';
+import { errorAlert, successAlert } from "@/utils/alerts";
+import { errorString } from "../../utils/constants";
 
 const NewsLineManagement = () => {
   //States
@@ -40,11 +44,11 @@ const NewsLineManagement = () => {
   //Fetch method
   const fetchNews = async () => {
     setIsLoading(true);
-    const news = await asyncGetNews();
+    const news = await asyncGetAllNews();
     setIsLoading(false);
-    if(news && news?.data?.length > 0 ){
+    if (news && news?.data?.length > 0) {
       setNewsData(news?.data);
-    } else{
+    } else {
       errorAlert(errorString.catchError);
     }
   };
@@ -85,6 +89,31 @@ const NewsLineManagement = () => {
 
   const handleOnClickViewAll = () => {
     setIsViewAll((prev) => !prev);
+  };
+
+  const handleOnClickDelete = async (data: any) => {
+    setIsLoading(true);
+    const response = await asyncDeleteNews({ nuid: data?.nuid });
+    setIsLoading(false);
+    if (response) {
+      if (response?.success) {
+        successAlert(`Project deleted successfully`);
+        fetchNews();
+      } else {
+        errorAlert(response || errorString.catchError);
+      }
+    }
+  };
+
+  const handleOnClickUpdate = async (data: any) => {
+    if (!data?.nuid) {
+      errorAlert("News id not found");
+      return;
+    }
+    router.push({
+      pathname: "/newsline",
+      query: { nuid: data?.nuid },
+    });
   };
 
   //render methods
@@ -142,7 +171,7 @@ const NewsLineManagement = () => {
                     <th>News Title</th>
                     <th>Start Date</th>
                     <th>News Description</th>
-                    {/* <th>Action</th> */}
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -152,19 +181,26 @@ const NewsLineManagement = () => {
                         <td>{item?.news || item?.id}</td>
                         <td>{item?.start_date}</td>
                         <td>{item?.description}</td>
-                        {/* <td>
+                        <td>
                           <div className="action-block">
-                            <Link href="">
+                            <Link
+                              href=""
+                              onClick={() => handleOnClickUpdate(data)}
+                            >
                               <img src="assets/edit-icon.svg" alt="edit-icon" />
                             </Link>
-                            <Link href="" className="delete-icon">
+                            <Link
+                              href=""
+                              className="delete-icon"
+                              onClick={() => handleOnClickDelete(data)}
+                            >
                               <img
                                 src="assets/trash-icon.svg"
                                 alt="trash-icon"
                               />
                             </Link>
                           </div>
-                        </td> */}
+                        </td>
                       </tr>
                     );
                   })}

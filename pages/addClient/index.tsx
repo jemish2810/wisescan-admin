@@ -1,14 +1,9 @@
 import Head from "next/head";
-import Image from "next/image";
-import { Inter } from "@next/font/google";
-import styles from "@/styles/Home.module.css";
-import Link from "next/link";
+
 import * as s from "../../styles/common.style";
-// import { Sidebar } from "../sidebar";
 import Sidebar from "../../src/components/sidebar";
 import Router, { useRouter } from "next/router";
 
-import HomeIcon from "../../public/assets/home-icon.svg";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -92,11 +87,16 @@ const AddClient = () => {
   }, [router]);
 
   const fetchClient = async (username: any) => {
-    if (username) {
+    if (username && !editData) {
       setIsLoading(true);
       let response = await asyncGetClient({ usrnme: username });
       setIsLoading(false);
-      setEditData(response);
+      if (response && typeof response !== "string") {
+        setEditData(response);
+      } else {
+        errorAlert(response);
+        Router.push("/clients");
+      }
     }
   };
 
@@ -149,23 +149,6 @@ const AddClient = () => {
       }
     }
   };
-
-  // const handleAllCheckBoxChanges = (event: any) => {
-  //   const { checked, name } = event.target;
-  //   if (name == "all") {
-  //     if (checked) {
-  //       setValue("gdb_flag", true);
-  //       setValue("xls_flag", true);
-  //       setValue("pdf_flag", true);
-  //     } else {
-  //       setValue("gdb_flag", false);
-  //       setValue("xls_flag", false);
-  //       setValue("pdf_flag", false);
-  //     }
-  //   } else {
-  //     setValue("all", false);
-  //   }
-  // };
 
   return (
     <>
@@ -324,7 +307,6 @@ const AddClient = () => {
                       id="xls_flag"
                       type="checkbox"
                       {...register("xls_flag")}
-                      // onChange={handleAllCheckBoxChanges}
                     />
                     <label htmlFor="xls_flag">Excel(XLS)</label>
                   </div>
@@ -333,17 +315,11 @@ const AddClient = () => {
                       type="checkbox"
                       {...register("gdb_flag")}
                       id="gdb_flag"
-                      // onChange={handleAllCheckBoxChanges}
                     />
                     <label htmlFor="gdb_flag">Excel(GDB)</label>
                   </div>
                   <div className="custom-checkbox">
-                    <input
-                      type="checkbox"
-                      {...register("all")}
-                      id="all"
-                      // onChange={handleAllCheckBoxChanges}
-                    />
+                    <input type="checkbox" {...register("all")} id="all" />
                     <label htmlFor="all">All</label>
                   </div>
                 </div>

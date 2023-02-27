@@ -78,6 +78,10 @@ const Project = () => {
   };
 
   const handleOnClickUpdate = async (data: any) => {
+    if (!data?.code) {
+      errorAlert("Project not found");
+      return;
+    }
     router.push({
       pathname: "/addproject",
       query: { code: data.code },
@@ -98,7 +102,7 @@ const Project = () => {
       const response = await asyncSearchProject({ p_name: searchValue });
       setIsLoading(false);
       if (response) {
-        if (response?.data?.length > 0 && typeof response?.data !== 'string') {
+        if (response?.data?.length > 0 && typeof response?.data !== "string") {
           setProjectsData(response.data);
         } else {
           errorAlert(response.data || errorString.catchError);

@@ -1,10 +1,6 @@
 import Head from "next/head";
-import Image from "next/image";
-import { Inter } from "@next/font/google";
-import styles from "@/styles/Home.module.css";
-import Link from "next/link";
+
 import * as s from "../../styles/common.style";
-// import { Sidebar } from "../sidebar";
 import Sidebar from "../../src/components/sidebar";
 import Select from "react-select";
 
@@ -17,19 +13,14 @@ import {
   asyncGetProject,
   asyncUpdateProject,
 } from "@/services/project/project.service";
-import {
-  DAYS,
-  DUMMY_CLIENTS,
-  errorString,
-  MONTHS,
-  YEARS,
-} from "@/utils/constants";
+import { DAYS, errorString, MONTHS, YEARS } from "@/utils/constants";
 import { useEffect, useRef, useState } from "react";
 import { asyncGetAllClients } from "@/services/client/client.service";
 import Router from "next/router";
 import { checkIsAuth } from "@/utils/globalFunctions";
 import { useRouter } from "next/router";
 import { errorAlert, successAlert } from "@/utils/alerts";
+import Loader from "@/src/components/Loader";
 
 const addProjectValidationSchema = yup.object({
   code: yup.string(),
@@ -47,7 +38,7 @@ const addProjectValidationSchema = yup.object({
   geo: yup.string().required("Geo-technical is required"),
 });
 
-const AddProject = ({ editData }: any) => {
+const AddProject = () => {
   const {
     register,
     handleSubmit,
@@ -62,6 +53,8 @@ const AddProject = ({ editData }: any) => {
 
   const [selectedOption, setSelectedOption] = useState<any>(null);
   const [options, setOptions] = useState<any>([]);
+  const [editData, setEditData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (selected: any) => {
     setSelectedOption(selected);
@@ -96,6 +89,26 @@ const AddProject = ({ editData }: any) => {
     dataFetchedRef.current = true;
     fetchClients();
   }, []);
+
+  useEffect(() => {
+    if (router?.query && router?.query?.code) {
+      fetchClient(router?.query?.code);
+    }
+  }, [router]);
+
+  const fetchClient = async (code: any) => {
+    if (code) {
+      setIsLoading(true);
+      let response = await asyncGetProject({ code });
+      setIsLoading(false);
+      if (response && response?.length > 0) {
+        setEditData(response);
+      } else {
+        errorAlert("Project not found");
+        Router.push("/projects");
+      }
+    }
+  };
 
   const fetchClients = async () => {
     const response = await asyncGetAllClients();
@@ -465,16 +478,8 @@ const AddProject = ({ editData }: any) => {
           </div>
         </div>
       </s.CommonDashboardBlock>
+      <Loader isLoading={isLoading} />
     </>
   );
 };
 export default AddProject;
-
-AddProject.getInitialProps = async ({ query }: any) => {
-  const { code } = query;
-  let editData = null;
-  if (code) {
-    editData = await asyncGetProject({ code });
-  }
-  return { editData };
-};

@@ -1,31 +1,31 @@
 import Head from "next/head";
-import Image from "next/image";
-import { Inter } from "@next/font/google";
-import styles from "@/styles/Home.module.css";
-import Link from "next/link";
+
 import * as s from "../../styles/common.style";
-// import { Sidebar } from "../sidebar";
 import Sidebar from "../../src/components/sidebar";
 import moment from "moment-mini";
 
-import HomeIcon from "../../public/assets/home-icon.svg";
-import { DAYS, MONTHS, YEARS } from "@/utils/constants";
+import { DAYS, errorString, MONTHS, YEARS } from "@/utils/constants";
 
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import { asyncAddClient } from "@/services/client/client.service";
-import { asyncAddNews } from "@/services/news/news.service";
-import { useEffect } from "react";
+import {
+  asyncAddNews,
+  asyncGetNews,
+  asyncUpdateNews,
+} from "@/services/news/news.service";
+import { useEffect, useState } from "react";
 import { checkIsAuth } from "@/utils/globalFunctions";
-import Router from "next/router";
+import Router, { useRouter } from "next/router";
+import { errorAlert, successAlert } from "@/utils/alerts";
+import Loader from "@/src/components/Loader";
 
 const addNewsLineValidationSchema = yup.object({
   news: yup.string().required("News is required"),
   day: yup.number().required("Day is required"),
   month: yup.number().required("Month is required"),
   year: yup.number().required("Year is required"),
-  desc: yup.string().required("Description is required"),
+  description: yup.string().required("Description is required"),
 });
 
 const Newsline = () => {
@@ -34,9 +34,15 @@ const Newsline = () => {
     handleSubmit,
     setError,
     formState: { errors },
+    setValue,
   } = useForm({
     resolver: yupResolver(addNewsLineValidationSchema),
   });
+
+  const router = useRouter();
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [editData, setEditData] = useState<any>(null);
 
   useEffect(() => {
     if (!checkIsAuth()) {
@@ -45,8 +51,38 @@ const Newsline = () => {
     }
   }, []);
 
+  useEffect(() => {
+    if (router?.query && router?.query?.nuid) {
+      fetchNewsLine(router?.query?.nuid);
+    }
+  }, [router]);
+
+  const fetchNewsLine = async (nuid: any) => {
+    if (nuid) {
+      setIsLoading(true);
+      let response = await asyncGetNews({ nuid });
+      setIsLoading(false);
+      if (response && response.data && response?.data?.length > 0) {
+        setEditData(response?.data?.[0]);
+      } else {
+        Router.push("newslinemanagement");
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (editData) {
+      setValue("news", editData?.news);
+      setValue("description", editData?.description);
+      setValue("day", editData?.start_date?.split("-")?.[0]);
+      setValue("month", editData?.start_date?.split("-")?.[1]);
+      setValue("year", editData?.start_date?.split("-")?.[2]);
+      setValue("nuid", editData?.nuid);
+    }
+  }, [editData, setValue]);
+
   const onSubmitNewsLine = async (data: any) => {
-    const { news, day, month, year, desc } = data;
+    const { news, day, month, year, description, nuid } = data;
     let start_date = day + "-" + month + "-" + year;
     const isDateValid = moment(start_date, "DD-M-YYYY").isValid();
     if (!isDateValid) {
@@ -54,10 +90,28 @@ const Newsline = () => {
         message: "Please enter valid start date",
       });
       return;
-    } 
-    const response = await asyncAddNews({ news, description: desc, start_date });
-    if (response && response?.success) {
-      Router.back();
+    }
+    const response = editData
+      ? await asyncUpdateNews({
+          news,
+          description,
+          start_date,
+          nuid,
+        })
+      : await asyncAddNews({
+          news,
+          description: description,
+          start_date,
+        });
+    if (response) {
+      if (response?.success) {
+        successAlert(
+          `News line ${editData ? "updated" : "added"} successfully`
+        );
+        Router.back();
+      } else {
+        errorAlert(response || errorString.catchError);
+      }
     }
   };
   return (
@@ -80,7 +134,7 @@ const Newsline = () => {
               onSubmit={handleSubmit(onSubmitNewsLine)}
             >
               <div className="form-group">
-                <label>Add News Line</label>
+                <label>News Line Title</label>
                 <input
                   type="text"
                   className="form-control"
@@ -152,23 +206,24 @@ const Newsline = () => {
                   id=""
                   className="form-control"
                   placeholder="Message here"
-                  {...register("desc", { required: true })}
+                  {...register("description", { required: true })}
                 ></textarea>
-                {errors?.desc && (
+                {errors?.description && (
                   <s.ErrorMessageBlock>
-                    {errors?.desc?.message}
+                    {errors?.description?.message}
                   </s.ErrorMessageBlock>
                 )}
               </div>
               <div className="last-btn">
                 <button type="submit" className="btn common-button-yellow">
-                  Add
+                  {editData ? `Update` : `Add`}
                 </button>
               </div>
             </s.CommonForm>
           </div>
         </div>
       </s.CommonDashboardBlock>
+      <Loader isLoading={isLoading} />
     </>
   );
 };

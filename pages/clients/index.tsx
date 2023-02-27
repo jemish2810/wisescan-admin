@@ -84,6 +84,10 @@ const Clients = () => {
   };
 
   const handleOnClickUpdate = async (data: any) => {
+    if (!data?.usrnme) {
+      errorAlert("Client not found");
+      return;
+    }
     router.push({
       pathname: "/addClient",
       query: { username: data.usrnme },
