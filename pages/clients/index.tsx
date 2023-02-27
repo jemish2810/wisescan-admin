@@ -102,9 +102,14 @@ const Clients = () => {
     if (searchValue) {
       setIsLoading(true);
       const response = await asyncSearchClient({ c_name: searchValue });
+      console.log('response: ', response);
       setIsLoading(false);
-      if (response && response.data) {
-        setClientData(response.data);
+      if (response && response?.length > 0) {
+        if(typeof response !== 'string'){
+          setClientData(response);
+        }else{
+          errorAlert(response || errorString.catchError);
+        }
       }
     }
   };

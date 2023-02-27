@@ -72,7 +72,7 @@ const AddProject = ({ editData }: any) => {
       const data = editData[0];
       setValue("code", data?.code);
       setValue("cont", data?.cont);
-      setValue("constr", data?.consultant);
+      setValue("constr", data?.constr);
       setValue("dev", data?.dev);
       setValue("geo", data?.geo);
       setValue("p_name", data?.p_name);

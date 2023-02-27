@@ -7,7 +7,7 @@ const api = new Api();
 
 export const asyncGetNews = async () => {
   try {
-    const response = await api.get("/getNews").then(async (res: any) => {
+    const response = await api.get("/getallNews").then(async (res: any) => {
       if (res && res?.isSuccess) {
         return res;
       }

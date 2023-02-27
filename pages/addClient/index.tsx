@@ -91,6 +91,7 @@ const AddClient = () => {
   }, [editData, setValue]);
 
   const onSubmitProjectHighlight = async (data: any) => {
+    console.log('data: ', data);
     setIsLoading(true);
     const response = editData
       ? await asyncUpdateClient({ ...data, original_username: router?.query?.username })
@@ -108,7 +109,6 @@ const AddClient = () => {
 
   const handleAllCheckBoxChanges = (event: any) => {
     const { checked, name } = event.target;
-    // setValue(name, checked);
     if (name == "all") {
       if (checked) {
         setValue("gdb_flag", true);
@@ -119,11 +119,7 @@ const AddClient = () => {
         setValue("xls_flag", false);
         setValue("pdf_flag", false);
       }
-    }
-    // else if (gdb_flag && xls_flag && pdf_flag) {
-    //   setValue("all", true);
-    // }
-    else {
+    } else {
       setValue("all", false);
     }
   };

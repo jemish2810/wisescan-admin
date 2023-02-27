@@ -12,6 +12,7 @@ import { PAGE_SIZE } from "@/utils/constants";
 import Loader from "@/src/components/Loader";
 import { checkIsAuth } from "@/utils/globalFunctions";
 import { errorAlert } from "@/utils/alerts";
+import { errorString } from '../../utils/constants';
 
 const NewsLineManagement = () => {
   //States
@@ -41,12 +42,10 @@ const NewsLineManagement = () => {
     setIsLoading(true);
     const news = await asyncGetNews();
     setIsLoading(false);
-    const totalPageCount = Math.ceil(data.length / PAGE_SIZE);
-    setTotalPageCount(totalPageCount);
-    if (news && news.data) {
-      let newsArr = [];
-      newsArr.push(news.data);
-      setNewsData(newsArr);
+    if(news && news?.data?.length > 0 ){
+      setNewsData(news?.data);
+    } else{
+      errorAlert(errorString.catchError);
     }
   };
 

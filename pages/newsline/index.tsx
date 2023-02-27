@@ -54,8 +54,8 @@ const Newsline = () => {
         message: "Please enter valid start date",
       });
       return;
-    }
-    const response = await asyncAddNews({ news, desc, start_date });
+    } 
+    const response = await asyncAddNews({ news, description: desc, start_date });
     if (response && response?.success) {
       Router.back();
     }

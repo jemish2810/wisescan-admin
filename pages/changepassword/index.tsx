@@ -15,8 +15,9 @@ import { useEffect, useState } from "react";
 import { checkIsAuth } from "@/utils/globalFunctions";
 import Router from "next/router";
 import { readCookie } from "@/utils/cookieCreator";
-import { localStorageKeys } from "@/utils/constants";
+import { errorString, localStorageKeys } from "@/utils/constants";
 import Loader from "@/src/components/Loader";
+import { errorAlert, successAlert } from "@/utils/alerts";
 
 const addProjectValidationSchema = yup
   .object({
@@ -45,6 +46,7 @@ const Changepassword = () => {
     register,
     handleSubmit,
     formState: { errors },
+    reset
   } = useForm({
     resolver: yupResolver(addProjectValidationSchema),
   });
@@ -61,15 +63,22 @@ const Changepassword = () => {
   const onSubmitChangePassword = async (data: any) => {
     const { cur_pass, new_pass, re_pass } = data;
     setIsLoading(true);
-    // const usrnme = readCookie(localStorageKeys.authKey);
+    const usrnme = readCookie(localStorageKeys.authKey);
     const response = await asyncChangePassword({
       curr_pass: cur_pass,
       new_pass,
+      usrnme,
       re_pass,
     });
-    console.log('response: ', response);
-
     setIsLoading(false);
+    if (response) {
+      if (response?.data?.success) {
+        successAlert(`Password update successfully`);
+        reset();
+      } else {
+        errorAlert(response?.data || errorString.catchError);
+      }
+    }
   };
 
   return (
