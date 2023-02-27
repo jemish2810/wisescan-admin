@@ -84,6 +84,10 @@ const Clients = () => {
   };
 
   const handleOnClickUpdate = async (data: any) => {
+    if (!data?.usrnme) {
+      errorAlert("Client not found");
+      return;
+    }
     router.push({
       pathname: "/addClient",
       query: { username: data.usrnme },
@@ -103,8 +107,12 @@ const Clients = () => {
       setIsLoading(true);
       const response = await asyncSearchClient({ c_name: searchValue });
       setIsLoading(false);
-      if (response && response.data) {
-        setClientData(response.data);
+      if (response && response?.length > 0) {
+        if (typeof response !== "string") {
+          setClientData(response);
+        } else {
+          errorAlert(response || errorString.catchError);
+        }
       }
     }
   };

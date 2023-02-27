@@ -1,14 +1,9 @@
 import Head from "next/head";
-import Image from "next/image";
-import { Inter } from "@next/font/google";
-import styles from "@/styles/Home.module.css";
-import Link from "next/link";
+
 import * as s from "../../styles/common.style";
-// import { Sidebar } from "../sidebar";
 import Sidebar from "../../src/components/sidebar";
 import Router, { useRouter } from "next/router";
 
-import HomeIcon from "../../public/assets/home-icon.svg";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -24,7 +19,7 @@ import { errorAlert, successAlert } from "@/utils/alerts";
 import { errorString } from "@/utils/constants";
 
 const addClientValidationSchema = yup.object({
-  org_nam: yup.string().required("Organization name is required"),
+  org_name: yup.string().required("Organization name is required"),
   sal: yup.string().required("Salutation is required"),
   c_name: yup.string().required("Name is required"),
   email: yup.string().required("Name is required"),
@@ -47,8 +42,9 @@ const AddClient = () => {
   });
   const [editData, setEditData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const pdf_flag = watch("pdf_flag");
+  const all = watch("all");
   const xls_flag = watch("xls_flag");
+  const pdf_flag = watch("pdf_flag");
   const gdb_flag = watch("gdb_flag");
 
   useEffect(() => {
@@ -59,23 +55,54 @@ const AddClient = () => {
   }, []);
 
   useEffect(() => {
+    if (all) {
+      setValue("gdb_flag", true);
+      setValue("xls_flag", true);
+      setValue("pdf_flag", true);
+    } else if (gdb_flag || xls_flag || pdf_flag) {
+      if (!all && gdb_flag && xls_flag && pdf_flag) {
+        setValue("gdb_flag", false);
+        setValue("xls_flag", false);
+        setValue("pdf_flag", false);
+      }
+    } else {
+      setValue("gdb_flag", false);
+      setValue("xls_flag", false);
+      setValue("pdf_flag", false);
+    }
+  }, [all, setValue]);
+
+  useEffect(() => {
+    if (gdb_flag && pdf_flag && xls_flag) {
+      setValue("all", true);
+    } else {
+      setValue("all", false);
+    }
+  }, [xls_flag, pdf_flag, gdb_flag, setValue]);
+
+  useEffect(() => {
     if (router?.query && router?.query?.username) {
       fetchClient(router?.query?.username);
     }
   }, [router]);
 
   const fetchClient = async (username: any) => {
-    if (username) {
+    if (username && !editData) {
       setIsLoading(true);
       let response = await asyncGetClient({ usrnme: username });
       setIsLoading(false);
-      setEditData(response);
+      if (response && typeof response !== "string") {
+        setEditData(response);
+      } else {
+        errorAlert(response);
+        Router.push("/clients");
+      }
     }
   };
 
   useEffect(() => {
     if (editData) {
-      setValue("org_nam", editData?.org_name);
+      setValue("org_name", editData?.org_name);
       setValue("sal", editData?.sal);
       setValue("c_name", editData?.c_name);
       setValue("email", editData?.email);
@@ -83,18 +110,35 @@ const AddClient = () => {
       setValue("pwd", editData?.pwd);
       setValue("phone", editData?.phone);
       setValue("status", editData?.status);
-      setValue("pdf_flag", editData?.pdf_flag);
-      setValue("xls_flag", editData?.xls_flag);
-      setValue("gdb_flag", editData?.gdb_flag);
-      setValue("is_admin", editData?.is_admin);
+      setValue("pdf_flag", editData?.pdf_flag == "True" ? true : false);
+      setValue("xls_flag", editData?.xlx_flag == "True" ? true : false);
+      setValue("gdb_flag", editData?.gdb_flag == "True" ? true : false);
+      setValue("all", editData?.all_flag == "True" ? true : false);
+      setValue("is_admin", editData?.is_admin == "True" ? true : false);
     }
   }, [editData, setValue]);
 
   const onSubmitProjectHighlight = async (data: any) => {
+    const { gdb_flag, xls_flag, pdf_flag, all, is_admin, ...rest } = data;
     setIsLoading(true);
     const response = editData
-      ? await asyncUpdateClient({ ...data })
-      : await asyncAddClient({ ...data });
+      ? await asyncUpdateClient({
+          ...rest,
+          original_username: router?.query?.username,
+          gdb_flag: gdb_flag == true ? "True" : "False",
+          xlx_flag: xls_flag == true ? "True" : "False",
+          pdf_flag: pdf_flag == true ? "True" : "False",
+          all_flag: all == true ? "True" : "False",
+          is_admin: is_admin == true ? "True" : "False",
+        })
+      : await asyncAddClient({
+          ...rest,
+          gdb_flag: gdb_flag == true ? "True" : "False",
+          xlx_flag: xls_flag == true ? "True" : "False",
+          pdf_flag: pdf_flag == true ? "True" : "False",
+          all_flag: all == true ? "True" : "False",
+          is_admin: is_admin == true ? "True" : "False",
+        });
     setIsLoading(false);
     if (response) {
       if (response?.success) {
@@ -103,28 +147,6 @@ const AddClient = () => {
       } else {
         errorAlert(response || errorString.catchError);
       }
-    }
-  };
-
-  const handleAllCheckBoxChanges = (event: any) => {
-    const { checked, name } = event.target;
-    // setValue(name, checked);
-    if (name == "all") {
-      if (checked) {
-        setValue("gdb_flag", true);
-        setValue("xls_flag", true);
-        setValue("pdf_flag", true);
-      } else {
-        setValue("gdb_flag", false);
-        setValue("xls_flag", false);
-        setValue("pdf_flag", false);
-      }
-    }
-    // else if (gdb_flag && xls_flag && pdf_flag) {
-    //   setValue("all", true);
-    // }
-    else {
-      setValue("all", false);
     }
   };
 
@@ -160,11 +182,11 @@ const AddClient = () => {
                   type="text"
                   className="form-control"
                   placeholder="Enter Organization"
-                  {...register("org_nam", { required: true })}
+                  {...register("org_name", { required: true })}
                 ></input>
-                {errors?.org_nam && (
+                {errors?.org_name && (
                   <s.ErrorMessageBlock>
-                    {errors?.org_nam?.message}
+                    {errors?.org_name?.message}
                   </s.ErrorMessageBlock>
                 )}
               </div>
@@ -276,7 +298,7 @@ const AddClient = () => {
                       id="pdf_flag"
                       type="checkbox"
                       {...register("pdf_flag")}
-                      onChange={handleAllCheckBoxChanges}
+                      // onChange={handleAllCheckBoxChanges}
                     />
                     <label htmlFor="pdf_flag">PDF</label>
                   </div>
@@ -285,7 +307,6 @@ const AddClient = () => {
                       id="xls_flag"
                       type="checkbox"
                       {...register("xls_flag")}
-                      onChange={handleAllCheckBoxChanges}
                     />
                     <label htmlFor="xls_flag">Excel(XLS)</label>
                   </div>
@@ -294,17 +315,11 @@ const AddClient = () => {
                       type="checkbox"
                       {...register("gdb_flag")}
                       id="gdb_flag"
-                      onChange={handleAllCheckBoxChanges}
                     />
                     <label htmlFor="gdb_flag">Excel(GDB)</label>
                   </div>
                   <div className="custom-checkbox">
-                    <input
-                      type="checkbox"
-                      {...register("all")}
-                      id="all"
-                      onChange={handleAllCheckBoxChanges}
-                    />
+                    <input type="checkbox" {...register("all")} id="all" />
                     <label htmlFor="all">All</label>
                   </div>
                 </div>
