@@ -122,6 +122,8 @@ const AddProject = () => {
         let abc: any = [];
         if (typeof data?.a_cname == "string") {
           abc = data?.a_cname?.split(",");
+        } else {
+          abc = data?.a_cname;
         }
         newOptions.forEach((item: any) => {
           if (abc?.some((name: any) => item.value === name)) {
@@ -190,7 +192,7 @@ const AddProject = () => {
       geo,
       abc: "test",
       c_name: "0001",
-      a_cname: a_cname?.toString(),
+      a_cname: a_cname,
       constr,
     };
 
