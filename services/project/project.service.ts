@@ -171,7 +171,7 @@ export const asyncDeleteProjectHighlight = async (payload: any) => {
 export const asyncGetProjectHighlight = async (payload: any) => {
   try {
     const response = await api
-      .delete("/getProjectHighlights", null, { params: payload })
+      .get("/getProjectHighlights", { params: payload })
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
           return res;
