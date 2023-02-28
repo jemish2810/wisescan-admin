@@ -51,7 +51,7 @@ export const asyncAddProject = async (payload: any) => {
 export const asyncUpdateProject = async (payload: any) => {
   try {
     const response = await api
-      .put("/updateProject", null, { params: payload })
+      .put("/updateProject", payload)
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
           return res.data;
@@ -96,7 +96,7 @@ export const asyncSearchProject = async (payload: any) => {
 export const asyncGetProjectHighlights = async () => {
   try {
     const response = await api
-      .get("/getProjectHighlights")
+      .get("/getAllProjectHighlights")
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
           return res;
@@ -171,7 +171,7 @@ export const asyncDeleteProjectHighlight = async (payload: any) => {
 export const asyncGetProjectHighlight = async (payload: any) => {
   try {
     const response = await api
-      .delete("/getProjectHighlight", null, { params: payload })
+      .delete("/getProjectHighlights", null, { params: payload })
       .then(async (res: any) => {
         if (res && res?.isSuccess) {
           return res;

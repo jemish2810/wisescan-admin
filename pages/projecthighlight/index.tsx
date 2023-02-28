@@ -60,8 +60,8 @@ const ProjectHighlight = () => {
       setIsLoading(true);
       let response = await asyncGetProjectHighlight({ phid });
       setIsLoading(false);
-      if (response && response.data && response?.data?.length > 0) {
-        setEditData(response?.data?.[0]);
+      if (response && response?.data) {
+        setEditData(response?.data);
       } else {
         Router.push("projecthighlightmanagement");
       }
