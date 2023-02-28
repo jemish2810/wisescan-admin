@@ -103,8 +103,9 @@ const Newsline = () => {
           description: description,
           start_date,
         });
+    console.log("response :>> ", response);
     if (response) {
-      if (response?.success) {
+      if (response?.data?.[0]?.success || response?.success) {
         successAlert(
           `News line ${editData ? "updated" : "added"} successfully`
         );

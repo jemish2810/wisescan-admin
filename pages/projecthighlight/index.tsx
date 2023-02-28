@@ -4,11 +4,16 @@ import Head from "next/head";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import { asyncAddProjectHighlights } from "@/services/project/project.service";
-import Router from "next/router";
+import {
+  asyncAddProjectHighlights,
+  asyncGetProjectHighlight,
+  asyncUpdateProjectHighlight,
+} from "@/services/project/project.service";
+import Router, { useRouter } from "next/router";
 import { errorAlert, successAlert } from "@/utils/alerts";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { checkIsAuth } from "@/utils/globalFunctions";
+import { errorString } from "@/utils/constants";
 
 const addProjectHighlightValidationSchema = yup.object().shape({
   p_name: yup.string().required("Project name is required"),
@@ -27,9 +32,15 @@ const ProjectHighlight = () => {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm({
     resolver: yupResolver(addProjectHighlightValidationSchema),
   });
+
+  const router = useRouter();
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [editData, setEditData] = useState<any>(null);
 
   useEffect(() => {
     if (!checkIsAuth()) {
@@ -38,22 +49,60 @@ const ProjectHighlight = () => {
     }
   }, []);
 
+  useEffect(() => {
+    if (router?.query && router?.query?.phid) {
+      fetchProject(router?.query?.phid);
+    }
+  }, [router]);
+
+  const fetchProject = async (phid: any) => {
+    if (phid) {
+      setIsLoading(true);
+      let response = await asyncGetProjectHighlight({ phid });
+      setIsLoading(false);
+      if (response && response.data && response?.data?.length > 0) {
+        setEditData(response?.data?.[0]);
+      } else {
+        Router.push("projecthighlightmanagement");
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (editData) {
+      setValue("p_name", editData?.p_name);
+      setValue("rank", editData?.rank);
+      setValue("desc", editData?.desc);
+      setValue("phid", editData?.phid);
+    }
+  }, [editData, setValue]);
+
   //Submit method
   const onSubmitProjectHighlight = async (data: any) => {
-    const { p_name, rank, desc, picture } = data;
-    const response = await asyncAddProjectHighlights({
+    const { p_name, rank, desc, picture, phid } = data;
+
+    const params = {
       p_name,
       desc,
       rank,
       pic_url: picture?.[0]?.name,
-    });
-    if (response?.success) {
-      successAlert("Project highlight added successfully");
-      Router.back();
-      return;
-    }
+      phid,
+    };
 
-    errorAlert(response);
+    const response = editData
+      ? await asyncUpdateProjectHighlight(params)
+      : await asyncAddProjectHighlights(params);
+
+    if (response) {
+      if (response?.data?.[0]?.success || response?.success) {
+        successAlert(
+          `Project highlight ${editData ? "updated" : "added"} successfully`
+        );
+        Router.back();
+      } else {
+        errorAlert(response || errorString.catchError);
+      }
+    }
   };
 
   //render method
@@ -66,7 +115,11 @@ const ProjectHighlight = () => {
       <s.CommonDashboardBlock>
         <div className="dashboard-block-inner">
           <div className="title-block flex-block-inner">
-            <h3>Add New Project Highlight</h3>
+            <h3>
+              {editData
+                ? `Update Project Highlight`
+                : `Add New Project Highlight`}
+            </h3>
             <p>
               <span>* </span>Denotes compulsory fields
             </p>
@@ -141,7 +194,7 @@ const ProjectHighlight = () => {
               </div>
               <div className="last-btn">
                 <button type="submit" className="btn common-button-yellow">
-                  Add
+                  {editData ? `Update` : `Add`}
                 </button>
               </div>
             </s.CommonForm>

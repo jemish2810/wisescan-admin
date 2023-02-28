@@ -10,7 +10,6 @@ import {
   asyncGetAllNews,
   asyncSearchNews,
 } from "@/services/news/news.service";
-import data from "../../utils/mockData.json";
 import Pagination from "@/src/components/Pagination";
 import { PAGE_SIZE } from "@/utils/constants";
 import Loader from "@/src/components/Loader";
@@ -79,10 +78,15 @@ const NewsLineManagement = () => {
       const response = await asyncSearchNews({ news: searchValue });
       setIsLoading(false);
       if (response) {
-        if (response?.data) {
+        if (
+          response?.data &&
+          response?.data?.length > 0 &&
+          typeof response?.data !== "string"
+        ) {
           setNewsData(response?.data);
+        } else {
+          errorAlert(response?.data);
         }
-        errorAlert(response);
       }
     }
   };
@@ -96,11 +100,11 @@ const NewsLineManagement = () => {
     const response = await asyncDeleteNews({ nuid: data?.nuid });
     setIsLoading(false);
     if (response) {
-      if (response?.success) {
+      if (response?.data?.success) {
         successAlert(`Project deleted successfully`);
         fetchNews();
       } else {
-        errorAlert(response || errorString.catchError);
+        errorAlert(response?.data || errorString.catchError);
       }
     }
   };
@@ -185,14 +189,14 @@ const NewsLineManagement = () => {
                           <div className="action-block">
                             <Link
                               href=""
-                              onClick={() => handleOnClickUpdate(data)}
+                              onClick={() => handleOnClickUpdate(item)}
                             >
                               <img src="assets/edit-icon.svg" alt="edit-icon" />
                             </Link>
                             <Link
                               href=""
                               className="delete-icon"
-                              onClick={() => handleOnClickDelete(data)}
+                              onClick={() => handleOnClickDelete(item)}
                             >
                               <img
                                 src="assets/trash-icon.svg"
