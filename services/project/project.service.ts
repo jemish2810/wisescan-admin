@@ -137,3 +137,48 @@ export const asyncSearchProjectHighlights = async (payload: any) => {
     return e.message;
   }
 };
+
+export const asyncUpdateProjectHighlight = async (payload: any) => {
+  try {
+    const response = await api
+      .put("/updateProjectHighlights", null, { params: payload })
+      .then(async (res: any) => {
+        if (res && res?.isSuccess) {
+          return res;
+        }
+      });
+    return response;
+  } catch (e: any) {
+    return e.message;
+  }
+};
+
+export const asyncDeleteProjectHighlight = async (payload: any) => {
+  try {
+    const response = await api
+      .delete("/deleteProjectHighlights", null, { params: payload })
+      .then(async (res: any) => {
+        if (res && res?.isSuccess) {
+          return res;
+        }
+      });
+    return response;
+  } catch (e: any) {
+    return e.message;
+  }
+};
+
+export const asyncGetProjectHighlight = async (payload: any) => {
+  try {
+    const response = await api
+      .delete("/getProjectHighlight", null, { params: payload })
+      .then(async (res: any) => {
+        if (res && res?.isSuccess) {
+          return res;
+        }
+      });
+    return response;
+  } catch (e: any) {
+    return e.message;
+  }
+};

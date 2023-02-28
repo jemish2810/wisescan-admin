@@ -6,14 +6,15 @@ import Sidebar from "../../src/components/sidebar";
 import Router, { useRouter } from "next/router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  asyncDeleteProjectHighlight,
   asyncGetProjectHighlights,
   asyncSearchProjectHighlights,
 } from "@/services/project/project.service";
-import { PAGE_SIZE } from "@/utils/constants";
+import { errorString, PAGE_SIZE } from "@/utils/constants";
 import Pagination from "@/src/components/Pagination";
 import Loader from "@/src/components/Loader";
 import { checkIsAuth } from "@/utils/globalFunctions";
-import { errorAlert } from "@/utils/alerts";
+import { errorAlert, successAlert } from "@/utils/alerts";
 
 const ProjectManagement = () => {
   const router = useRouter();
@@ -69,13 +70,44 @@ const ProjectManagement = () => {
         p_name: searchValue,
       });
       setIsLoading(false);
+      console.log("response :>> ", response);
       if (response) {
-        if (response?.data) {
+        if (
+          response?.data &&
+          response?.data?.length > 0 &&
+          typeof response?.data !== "string"
+        ) {
           setProjectsData(response?.data);
+        } else {
+          errorAlert(response?.data);
         }
-        errorAlert(response);
       }
     }
+  };
+
+  const handleOnClickDelete = async (data: any) => {
+    setIsLoading(true);
+    const response = await asyncDeleteProjectHighlight({ phid: data?.phid });
+    setIsLoading(false);
+    if (response) {
+      if (response?.data?.success) {
+        successAlert(`Project deleted successfully`);
+        fetchProjectHighlight();
+      } else {
+        errorAlert(response?.data || errorString.catchError);
+      }
+    }
+  };
+
+  const handleOnClickUpdate = async (data: any) => {
+    if (!data?.phid) {
+      errorAlert("Project id not found");
+      return;
+    }
+    router.push({
+      pathname: "/projecthighlight",
+      query: { phid: data?.phid },
+    });
   };
 
   const handleOnClickViewAll = () => {
@@ -135,7 +167,7 @@ const ProjectManagement = () => {
                     <th>Project name</th>
                     <th>Rank Priority</th>
                     <th>Project Write Up</th>
-                    {/* <th>Action</th> */}
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -153,22 +185,29 @@ const ProjectManagement = () => {
                         <td>{item?.p_name}</td>
                         <td>{item?.rank}</td>
                         <td>{item?.desc}</td>
-                        {/* <td>
+                        <td>
                           <div className="action-block">
-                            <Link href="#">
+                            <Link
+                              href=""
+                              onClick={() => handleOnClickUpdate(item)}
+                            >
                               <img
                                 src="assets/edit-icon.svg"
                                 alt="edit-icon"
                               ></img>
                             </Link>
-                            <Link href="#" className="delete-icon">
+                            <Link
+                              href=""
+                              className="delete-icon"
+                              onClick={() => handleOnClickDelete(item)}
+                            >
                               <img
                                 src="assets/trash-icon.svg"
                                 alt="trash-icon"
                               ></img>
                             </Link>
                           </div>
-                        </td> */}
+                        </td>
                       </tr>
                     );
                   })}
