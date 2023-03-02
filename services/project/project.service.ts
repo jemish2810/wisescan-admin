@@ -1,6 +1,7 @@
 import Api from "@/services/Api";
 import { localStorageKeys } from "@/utils/constants";
 import { createCookie, eraseCookie } from "@/utils/cookieCreator";
+import axios from "axios";
 import Router from "next/router";
 
 const api = new Api();
@@ -110,13 +111,14 @@ export const asyncGetProjectHighlights = async () => {
 
 export const asyncAddProjectHighlights = async (payload: any) => {
   try {
-    const response = await api
-      .post("/addProjectHighlights", payload)
-      .then(async (res: any) => {
-        if (res && res?.isSuccess) {
-          return res.data;
-        }
-      });
+    const response = await axios({
+      method: "post",
+      url: "http://143.198.198.28:5002/addProjectHighlights",
+      data: payload,
+      headers: { "Content-Type": "multipart/form-data" },
+    }).then(async (res: any) => {
+      return res;
+    });
     return response;
   } catch (e: any) {
     return e.message;
@@ -140,13 +142,15 @@ export const asyncSearchProjectHighlights = async (payload: any) => {
 
 export const asyncUpdateProjectHighlight = async (payload: any) => {
   try {
-    const response = await api
-      .put("/updateProjectHighlights", null, { params: payload })
-      .then(async (res: any) => {
-        if (res && res?.isSuccess) {
-          return res;
-        }
-      });
+    const response = await axios({
+      method: "post",
+      url: "http://143.198.198.28:5002/updateProjectHighlights",
+      data: payload,
+      headers: { "Content-Type": "multipart/form-data" },
+    }).then(async (res: any) => {
+      return res;
+    });
+    console.log("response :>> ", response);
     return response;
   } catch (e: any) {
     return e.message;

@@ -176,10 +176,7 @@ const ProjectManagement = () => {
                       <tr key={index}>
                         <td>
                           <div className="profile-img">
-                            <img
-                              src="assets/profile1.jpg"
-                              alt="img-profile"
-                            ></img>
+                            <img src={item?.pic_url} alt="img-profile"></img>
                           </div>
                         </td>
                         <td>{item?.p_name}</td>

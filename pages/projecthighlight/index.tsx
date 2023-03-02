@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @next/next/no-img-element */
 import * as s from "../../styles/common.style";
 import Sidebar from "../../src/components/sidebar";
 import Head from "next/head";
@@ -14,6 +16,8 @@ import { errorAlert, successAlert } from "@/utils/alerts";
 import { useEffect, useState } from "react";
 import { checkIsAuth } from "@/utils/globalFunctions";
 import { errorString } from "@/utils/constants";
+import axios from "axios";
+import Loader from "@/src/components/Loader";
 
 const addProjectHighlightValidationSchema = yup.object().shape({
   p_name: yup.string().required("Project name is required"),
@@ -41,6 +45,7 @@ const ProjectHighlight = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [editData, setEditData] = useState<any>(null);
+  const [pic, setPic] = useState("");
 
   useEffect(() => {
     if (!checkIsAuth()) {
@@ -60,6 +65,7 @@ const ProjectHighlight = () => {
       setIsLoading(true);
       let response = await asyncGetProjectHighlight({ phid });
       setIsLoading(false);
+      console.log("response :>> ", response);
       if (response && response?.data) {
         setEditData(response?.data);
       } else {
@@ -74,27 +80,51 @@ const ProjectHighlight = () => {
       setValue("rank", editData?.rank);
       setValue("desc", editData?.desc);
       setValue("phid", editData?.phid);
+      fetchImage(editData?.pic_url);
+      setPic(editData?.pic_url);
     }
   }, [editData, setValue]);
+
+  const fetchImage = async (url: string) => {
+    const fileName: any = url.split("/").pop();
+    const type: any = url.split("/").pop()?.split(".")?.[1];
+    const image = await axios
+      .get(url, {
+        responseType: "arraybuffer",
+      })
+      .then((response) => {
+        return Buffer.from(response.data, "binary").toString("base64");
+      })
+      .then(function (buf) {
+        return new File([buf], fileName, { type: `image/${type}` });
+      });
+    let filesData = [];
+    filesData.push(image);
+    setValue("picture", filesData);
+  };
 
   //Submit method
   const onSubmitProjectHighlight = async (data: any) => {
     const { p_name, rank, desc, picture, phid } = data;
-
-    const params = {
-      p_name,
-      desc,
-      rank,
-      pic_url: picture?.[0]?.name,
-      phid,
-    };
+    setIsLoading(true);
+    let formData = new FormData();
+    formData.append("phid", phid);
+    formData.append("p_name", p_name);
+    formData.append("desc", desc);
+    formData.append("rank", rank);
+    formData.append("pic_url", picture?.[0]);
 
     const response = editData
-      ? await asyncUpdateProjectHighlight(params)
-      : await asyncAddProjectHighlights(params);
+      ? await asyncUpdateProjectHighlight(formData)
+      : await asyncAddProjectHighlights(formData);
+    setIsLoading(false);
 
     if (response) {
-      if (response?.data?.[0]?.success || response?.success) {
+      if (
+        response?.data?.[0]?.success ||
+        response?.data?.success ||
+        response?.success
+      ) {
         successAlert(
           `Project highlight ${editData ? "updated" : "added"} successfully`
         );
@@ -181,11 +211,19 @@ const ProjectHighlight = () => {
                 <label>
                   Photo <span>*</span>
                 </label>
-                <input
-                  type="file"
-                  {...register("picture")}
-                  // onChange={onChangeFile}
-                />
+                {pic ? (
+                  <div className="profile-img">
+                    <span onClick={() => setPic("")}>X</span>
+                    <img src={pic} alt="img-profile"></img>
+                  </div>
+                ) : (
+                  <input
+                    type="file"
+                    accept="image/*"
+                    {...register("picture")}
+                    // onChange={onChangeFile}
+                  />
+                )}
                 {errors?.picture && (
                   <s.ErrorMessageBlock>
                     {errors.picture.message}
@@ -200,6 +238,7 @@ const ProjectHighlight = () => {
             </s.CommonForm>
           </div>
         </div>
+        <Loader isLoading={isLoading} />
       </s.CommonDashboardBlock>
     </>
   );

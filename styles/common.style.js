@@ -43,6 +43,20 @@ export const CommonForm = styled.form`
   .form-group {
     margin-bottom: 30px;
     text-align: left;
+    .profile-img {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      span {
+        color: black;
+        cursor: pointer;
+      }
+      img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+      }
+    }
     .basic-multi-select {
       > div {
         background: #f2f7ff;
